@@ -17,10 +17,10 @@ int main(const int argc, const char *argv[])
 		//TODO: Handle window
 
 		//TODO: Create animation loop, controls...
-		return 0;
+		return errorCode;
 	}
 	catch (const std::exception& e) {
-		std::cerr << e.what() << std::endl;
-		return errorCode;
+		std::cerr << RED << e.what() << RESET << std::endl;
+		return errorCode == NO_ERROR ? UNDEFINED_ERROR : errorCode;
 	}
 }
