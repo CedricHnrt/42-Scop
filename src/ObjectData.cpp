@@ -62,6 +62,7 @@ void ObjectData::load(const char* filepath) {
 				faces.push_back(face);
 		}
 	}
+	file.close();
 	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
 	this->printInfo();
 }
