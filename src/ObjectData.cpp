@@ -14,34 +14,52 @@ static std::string getFilename(const std::string& filepath) {
 
 void ObjectData::load(const char* filepath) {
 	checkFilename(filepath);
-	this->filename = getFilename(filepath);
+	this->filename = getFilename(filepath); // Extract filename from path
 	
 	std::cout << BOLD << "Loading " << this->filename << "..." << RESET << std::endl;
 	std::ifstream file(filepath);
 	if (!file.is_open())
 		throw UnableToOpenFileException();
+	
 	std::string line;
+	size_t lineIndex = 0; // Line index for error reporting
 	while (std::getline(file, line)) {
+		lineIndex++;
 		if (line.empty() || line[0] == '#')
 			continue;
 		std::istringstream iss(line);
 		std::string type;
 		iss >> type;
-		if (type == "v") {
+		if (type == "v") {	//Vertex coordinates
 			Vec3 vertex;
 			iss >> vertex.x >> vertex.y >> vertex.z;
 			this->vertices.push_back(vertex);
 		}
-		else if (type == "f") {
+		else if (type == "f") {	//Face indices
 			std::vector<int> face;
 			std::string part;
-			while (iss >> part) {
+			while (iss >> part) { // Read each part of the face definition
 				std::istringstream pss(part);
 				std::string vIndexString;
-				std::getline(pss, vIndexString, '/');
-				face.push_back(std::stoi(vIndexString) - 1);
+				std::getline(pss, vIndexString, '/'); // Ignore texture and normal indices
+				try {
+					face.push_back(std::stoi(vIndexString) - 1); // OBJ indices are 1-based
+				}
+				catch (const std::invalid_argument& e) {
+					std::cerr << YELLOW << "WARNING: Invalid vertex index: " << vIndexString << RESET << std::endl;
+					std::cerr << "Line " << lineIndex << std::endl;
+					face.clear();
+					break;
+				}
+				catch (const std::out_of_range& e) {
+					std::cerr << YELLOW << "WARNING: Vertex index out of range: " << vIndexString << RESET << std::endl;
+					std::cerr << "Line " << lineIndex << std::endl;
+					face.clear();
+					break;
+				}
 			}
-			faces.push_back(face);
+			if (face.size() >= 3) // Ensure at least a triangle
+				faces.push_back(face);
 		}
 	}
 	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
