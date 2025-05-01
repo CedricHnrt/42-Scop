@@ -7,10 +7,11 @@
 
 enum errorType {
   	NO_ERROR,				    //0
-  	NO_ARG_ERROR,			    //1
-	TOO_MANY_ARG_ERROR,		    //2
-  	WRONG_EXTENSION_ERROR,	    //3
-	UNABLE_TO_OPEN_FILE_ERROR	//4
+	UNDEFINED_ERROR,			//1
+  	NO_ARG_ERROR,			    //2
+	TOO_MANY_ARG_ERROR,		    //3
+  	WRONG_EXTENSION_ERROR,	    //4
+	UNABLE_TO_OPEN_FILE_ERROR	//5
 };
 
 extern errorType errorCode;
@@ -19,13 +20,13 @@ class BaseException : public std::exception {
   protected:
     	std::string message;
   public:
-      	explicit BaseException(std::string  message) : message(std::move(message)) {}
+      	explicit BaseException(std::string message) : message(std::move(message)) {}
       	const char* what() const noexcept override { return message.c_str(); }
 };
 
 class NoArgException final : public BaseException {
   public: 
-    	NoArgException() : BaseException("ERROR: Insert a .obj file name to load\nUSAGE: ./scop file.obj") {
+    	NoArgException() : BaseException("ERROR: Insert a .obj file name to load\n USAGE: ./scop file.obj") {
           		errorCode = NO_ARG_ERROR;
     	}
 };
