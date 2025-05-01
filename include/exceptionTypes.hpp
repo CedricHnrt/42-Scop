@@ -23,28 +23,28 @@ class BaseException : public std::exception {
       	const char* what() const noexcept override { return message.c_str(); }
 };
 
-class NoArgException : public BaseException {
+class NoArgException final : public BaseException {
   public: 
     	NoArgException() : BaseException("ERROR: Insert a .obj file name to load\nUSAGE: ./scop file.obj") {
           		errorCode = NO_ARG_ERROR;
     	}
 };
 
-class TooManyArgException : public BaseException {
+class TooManyArgException final : public BaseException {
   public: 
 		TooManyArgException() : BaseException("ERROR: Too many arguments\nUSAGE: ./scop file.obj") {
                   errorCode = TOO_MANY_ARG_ERROR;
 		}
 };
 
-class WrongExtensionException : public BaseException {
+class WrongExtensionException final : public BaseException {
   public: 
 		WrongExtensionException() : BaseException("ERROR: Wrong file extension\nUSAGE: ./scop file.obj") {
 				  errorCode = WRONG_EXTENSION_ERROR;
 		}
 };
 
-class UnableToOpenFileException : public BaseException {
+class UnableToOpenFileException final : public BaseException {
   public: 
         UnableToOpenFileException() : BaseException("ERROR: Unable to open file") {
                   errorCode = UNABLE_TO_OPEN_FILE_ERROR;
