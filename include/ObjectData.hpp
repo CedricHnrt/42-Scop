@@ -18,7 +18,7 @@ class ObjectData {
    	private:
 		ObjectData() = default;
 		~ObjectData() = default;
-		const char *object = nullptr;
+		std::string filename;
 };
 
 #endif //OBJECTDATA_HPP
