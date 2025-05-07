@@ -8,13 +8,13 @@ static void checkFilename(const char* filename) {
 		throw WrongExtensionException();
 }
 
-static std::string getFilename(const std::string& filepath) {
+static std::string prepareFilename(const std::string& filepath) {
 	return filepath.substr(filepath.find_last_of("\\/") + 1);
 }
 
 void ObjectData::load(const char* filepath) {
 	checkFilename(filepath);
-	this->filename = getFilename(filepath); // Extract filename from path
+	this->filename = prepareFilename(filepath); // Extract filename from path
 	
 	std::cout << BOLD << "Loading " << this->filename << "..." << RESET << std::endl;
 	std::ifstream file(filepath);
@@ -74,6 +74,11 @@ void ObjectData::printInfo() const {
 	std::cout << "Faces: " << this->faces.size() << std::endl;
 	std::cout << std::endl;
 }
+
+const std::string& ObjectData::getFilename() const {
+	return this->filename;
+}
+
 
 ObjectData& ObjectData::getInstance() {
 	static ObjectData instance;
