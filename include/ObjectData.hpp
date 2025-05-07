@@ -18,6 +18,7 @@ class ObjectData {
 		void operator delete(void*) = delete;
 		void load(const char* filepath);
 		void printInfo() const;
+		const std::string& getFilename() const;
     
    	private:
 		ObjectData() = default;
