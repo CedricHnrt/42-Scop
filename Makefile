@@ -12,12 +12,13 @@ NAME = scop
 CC = @c++
 INCLUDES =	-Iinclude/
 
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++11 -MMD -MP
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++17 -MMD -MP
 RM = @rm -rf
 MKDIR = @mkdir -p
 PRINT = @echo
-FILES =	main		\
-		ObjectData
+FILES =	main			\
+		ObjectData		\
+		WindowManager
 OBJ_DIR = obj/
 BIN_DIR = bin/
 
@@ -27,7 +28,7 @@ DEP = $(addsuffix .d, $(addprefix $(OBJ_DIR), $(FILES)))
 $(NAME): $(OBJ)
 	$(MKDIR) $(BIN_DIR)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
-	$(CC) $(OBJ) -o $(BIN_DIR)$(NAME)
+	$(CC) $(OBJ) -o $(BIN_DIR)$(NAME) -lX11
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 obj/%.o: src/%.cpp Makefile
