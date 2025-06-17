@@ -12,7 +12,7 @@ NAME = scop
 CC = @c++
 INCLUDES =	-Iinclude/
 
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++17 -MMD -MP
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++17 -MMD -MP -g3
 RM = @rm -rf
 MKDIR = @mkdir -p
 PRINT = @echo
@@ -25,10 +25,10 @@ BIN_DIR = bin/
 OBJ = $(addsuffix .o, $(addprefix $(OBJ_DIR), $(FILES)))
 DEP = $(addsuffix .d, $(addprefix $(OBJ_DIR), $(FILES)))
 
-$(NAME): $(OBJ)
+bin/$(NAME): $(OBJ)
 	$(MKDIR) $(BIN_DIR)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
-	$(CC) $(OBJ) -o $(BIN_DIR)$(NAME) -lX11
+	$(CC) $(OBJ) -o $(BIN_DIR)$(NAME) -lX11 -lGLX
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 obj/%.o: src/%.cpp Makefile
@@ -36,7 +36,7 @@ obj/%.o: src/%.cpp Makefile
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 	$(CC) -c $(C++FLAGS) $< -o $@
 
-all: $(NAME)
+all: bin/$(NAME)
 
 clean:
 ifneq ($(strip $(wildcard $(OBJ))),)
@@ -52,8 +52,12 @@ ifeq ($(wildcard $(BIN_DIR)$(NAME)), $(BIN_DIR)$(NAME))
 	$(PRINT) "${_GREEN}$(NAME) deleted.\a${_END}"
 endif
 
+valgrind: all
+	@valgrind --leak-check=full --suppressions=/usr/lib/valgrind/default.supp --track-origins=yes ./bin/$(NAME) assets/42.obj
+
+
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re valgrind
 
 -include $(DEP)
