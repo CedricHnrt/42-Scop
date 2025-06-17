@@ -15,9 +15,15 @@ public:
 	WindowManager& operator=(const WindowManager&) = delete;
 	void* operator new(size_t) = delete;
 	void operator delete(void*) = delete;
-	void createWindow(const char* name = nullptr);	// default name to "SCOP - <filename>"
+	void createWindow(const char *name = nullptr, const std::vector<int>& windowRes = std::vector<int>());
 
 private:
+	Display* display = nullptr;
+	int screen = 0;
+	std::string name;
+	std::vector<int> resolution;
+	void resolveName(const char *name);
+	void resolveResolution(const std::vector<int>& windowRes);
 	WindowManager() = default; 
 	~WindowManager();
 };
