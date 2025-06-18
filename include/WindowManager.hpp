@@ -19,6 +19,7 @@ public:
 
 private:
 	Display* display = nullptr;
+	Window window;
 	int screen = 0;
 	std::string name;
 	std::vector<int> resolution;

@@ -38,7 +38,7 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	this->resolveResolution(windowRes); // Set Window Resolution
 	
 	int visualAttribs[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None}; // Attributes for the visual
-	const XVisualInfo* visual = glXChooseVisual(this->display, this->screen, visualAttribs); // Choose a visual that supports OpenGL
+	XVisualInfo* visual = glXChooseVisual(this->display, this->screen, visualAttribs); // Choose a visual that supports OpenGL
 	if (!visual) {
 		throw std::runtime_error("Failed to get a visual from X screen");
 	}
@@ -47,9 +47,17 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	XSetWindowAttributes attributes;
 	attributes.colormap = colormap;
 	attributes.event_mask = ExposureMask | KeyPressMask;
-	(void)attributes;
 	
-	//Window window = XCreateWindow(this->display, root, 0, 0, ) // TODO: Window Res
+	this->window = XCreateWindow(this->display, root, 0, 0, this->resolution[0], this->resolution[1], 0,
+			visual->depth, InputOutput, visual->visual, CWColormap | CWEventMask, &attributes); // Create the window
+
+	XStoreName(this->display, this->window, this->name.c_str()); // Set the window name
+	XMapWindow(this->display, this->window); // Map the window to the screen
+	GLXContext context = glXCreateContext(this->display, visual, nullptr, GL_TRUE);
+	if (!context) {
+		throw std::runtime_error("Failed to create OpenGL context");
+	}
+	glXMakeCurrent(this->display, this->window, context); // Make the context current
 }
 
 WindowManager& WindowManager::getInstance() {
@@ -58,6 +66,11 @@ WindowManager& WindowManager::getInstance() {
 }
 
 WindowManager::~WindowManager() {
+	glXMakeCurrent(this->display, None, nullptr);
+	if (this->display && this->screen >= 0) {
+		XFreeColormap(this->display, DefaultColormap(this->display, this->screen)); // Free the colormap
+	}
+	XDestroyWindow(this->display, this->window);
 	if (this->display)
 		XCloseDisplay(display);
 }
