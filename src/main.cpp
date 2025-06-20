@@ -14,11 +14,10 @@ int main(const int argc, const char *argv[])
 			throw TooManyArgException();
 		}
 		ObjectData::getInstance().load(argv[1]);
-
-		//TODO: Handle window
 		WindowManager::getInstance().createWindow();
-
+		WindowManager::getInstance().animationLoop();
 		//TODO: Create animation loop, controls...
+		
 	}
 	catch (const std::exception& e) {
 		std::cerr << RED << e.what() << RESET << std::endl;
