@@ -1,11 +1,5 @@
 #include "WindowManager.hpp"
 
-void WindowManager::resolveName(const char *name) {
-	if (name)
-		this->name = name;
-	this->name = "SCOP - " + ObjectData::getInstance().getFilename();
-}
-
 static bool validateResolution(const std::vector<int>& windowRes, const std::vector<int>& maxRes) {
 	if (windowRes.size() != 2)
 		return false;
@@ -14,6 +8,12 @@ static bool validateResolution(const std::vector<int>& windowRes, const std::vec
 	if (windowRes[0] < 800 || windowRes[1] < 600)
 		return false;
 	return true;
+}
+
+void WindowManager::resolveName(const char *name) {
+	if (name)
+		this->name = name;
+	this->name = "SCOP - " + ObjectData::getInstance().getFilename();
 }
 
 void WindowManager::resolveResolution(const std::vector<int>& windowRes) {
@@ -57,8 +57,42 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	if (!context) {
 		throw std::runtime_error("Failed to create OpenGL context");
 	}
+
+	Atom wmDelete = XInternAtom(this->display, "WM_DELETE_WINDOW", False); // Create a delete window atom
+	XSetWMProtocols(this->display, this->window, &wmDelete, 1); // Set the delete window protocol
+	this->wmDelete = wmDelete;
+	
 	glXMakeCurrent(this->display, this->window, context); // Make the context current
 }
+
+void WindowManager::animationLoop() {
+	XEvent event;
+	this->running = true;
+	while (this->running) {
+		while (XPending(this->display)) {
+			XNextEvent(this->display, &event);
+			switch (event.type) {
+				case KeyPress:
+					if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_Escape)) {
+						this->running = false; // Exit the loop on Escape key press
+						std::cout << "Escape key pressed. Exiting animation loop." << std::endl;
+					}
+					break;
+				case ClientMessage:
+					if (event.xclient.data.l[0] == this->wmDelete) {
+						this->running = false; // Exit the loop on window close request
+						std::cout << "Window close requested." << std::endl;
+					}
+					break;
+				default: std::cout << "Unhandled event type: " << event.type << std::endl; // Log unhandled events
+					break;
+			}
+		}
+		std::cout << "Running animation loop..." << std::endl; // Placeholder for animation loop
+		//TODO: Handle rendering
+	}
+}
+
 
 WindowManager& WindowManager::getInstance() {
 	static WindowManager instance;
@@ -70,6 +104,7 @@ WindowManager::~WindowManager() {
 	if (this->display && this->screen >= 0) {
 		XFreeColormap(this->display, DefaultColormap(this->display, this->screen)); // Free the colormap
 	}
+	glXDestroyContext(this->display, glXGetCurrentContext()); // Destroy the OpenGL context
 	XDestroyWindow(this->display, this->window);
 	if (this->display)
 		XCloseDisplay(display);

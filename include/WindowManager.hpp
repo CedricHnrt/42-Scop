@@ -16,10 +16,13 @@ public:
 	void* operator new(size_t) = delete;
 	void operator delete(void*) = delete;
 	void createWindow(const char *name = nullptr, const std::vector<int>& windowRes = std::vector<int>());
+	void animationLoop();
 
 private:
 	Display* display = nullptr;
 	Window window;
+	long wmDelete = None;
+	bool running = false;
 	int screen = 0;
 	std::string name;
 	std::vector<int> resolution;
