@@ -26,7 +26,7 @@ class BaseException : public std::exception {
 
 class NoArgException final : public BaseException {
   public: 
-    	NoArgException() : BaseException("ERROR: Insert a .obj file name to load\n USAGE: ./scop file.obj") {
+    	NoArgException() : BaseException("ERROR: Insert a .obj file name to load\nUSAGE: ./scop file.obj") {
           		errorCode = NO_ARG_ERROR;
     	}
 };
