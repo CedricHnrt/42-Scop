@@ -84,12 +84,18 @@ void WindowManager::animationLoop() {
 						std::cout << "Window close requested." << std::endl;
 					}
 					break;
+				case Expose:
+					if (event.xexpose.count == 0) {
+						std::cout << "Window exposed. Redrawing..." << std::endl; // Handle window exposure
+						//TODO: handle window exposure, e.g., redraw the scene
+					}
+					break;
 				default: std::cout << "Unhandled event type: " << event.type << std::endl; // Log unhandled events
 					break;
 			}
 		}
-		std::cout << "Running animation loop..." << std::endl; // Placeholder for animation loop
 		//TODO: Handle rendering
+		
 	}
 }
 
