@@ -12,6 +12,11 @@ static std::string prepareFilename(const std::string& filepath) {
 	return filepath.substr(filepath.find_last_of("\\/") + 1);
 }
 
+void ObjectData::loadInGLBuffer() {
+	
+}
+
+
 void ObjectData::load(const char* filepath) {
 	checkFilename(filepath);
 	this->filename = prepareFilename(filepath); // Extract filename from path
@@ -36,7 +41,7 @@ void ObjectData::load(const char* filepath) {
 			this->vertices.push_back(vertex);
 		}
 		else if (type == "f") {	//Face indices
-			std::vector<int> face;
+			std::vector<unsigned int> face;
 			std::string part;
 			while (iss >> part) { // Read each part of the face definition
 				std::istringstream pss(part);
@@ -58,8 +63,20 @@ void ObjectData::load(const char* filepath) {
 					break;
 				}
 			}
-			if (face.size() >= 3) // Ensure at least a triangle
-				faces.push_back(face);
+			if (face.size() == 3) {
+				this->faces.push_back(face);
+			}
+			else if (face.size() < 3) { // Ensure at least a triangle
+				std::cerr << YELLOW << "WARNING: Face with less than 3 vertices found, skipping." << RESET << std::endl;
+				std::cerr << "Line " << lineIndex << std::endl;
+			}
+			else { // Handle polygons with more than 3 vertices
+				// Triangulate the polygon
+				for (size_t i = 1; i < face.size() - 1; ++i) {
+					std::vector triangle = {face[0], face[i], face[i + 1]};
+					this->faces.push_back(triangle);
+				}
+			}
 		}
 	}
 	file.close();
@@ -73,6 +90,16 @@ void ObjectData::printInfo() const {
 	std::cout << "Vertices: " << this->vertices.size() << std::endl;
 	std::cout << "Faces: " << this->faces.size() << std::endl;
 	std::cout << std::endl;
+	// for (const auto& vertex : this->vertices) {
+	// 	std::cout << "Vertex: " << vertex.x << ", " << vertex.y << ", " << vertex.z << std::endl;
+	// }
+	// for (const auto& face : this->faces) {
+	// 	std::cout << "Face: ";
+	// 	for (const auto& index : face) {
+	// 		std::cout << index + 1 << " "; // Convert back to 1-based index for display
+	// 	}
+	// 	std::cout << std::endl;
+	// }
 }
 
 const std::string& ObjectData::getFilename() const {

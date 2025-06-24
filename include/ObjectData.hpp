@@ -25,7 +25,8 @@ class ObjectData {
 		~ObjectData() = default;
 		std::string filename;
 		std::vector<Vec3> vertices;
-		std::vector<std::vector<int>> faces;
+		std::vector<std::vector<unsigned int>> faces;
+		void loadInGLBuffer();
 };
 
 #endif //OBJECTDATA_HPP
