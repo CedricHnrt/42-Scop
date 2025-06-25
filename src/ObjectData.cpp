@@ -39,7 +39,7 @@ void ObjectData::getFace(std::istringstream& iss) {
 		}
 	}
 	if (face.size() == 3) {
-		this->faces.push_back(face);
+		this->faces.insert(this->faces.end(), face.begin(), face.end()); // Directly add triangle indices
 	}
 	else if (face.size() < 3) { // Ensure at least a triangle
 		std::cerr << YELLOW << "WARNING: Face with less than 3 vertices found, skipping." << RESET << std::endl;
@@ -49,7 +49,7 @@ void ObjectData::getFace(std::istringstream& iss) {
 		// Triangulate the polygon
 		for (size_t i = 1; i < face.size() - 1; ++i) {
 			std::vector triangle = {face[0], face[i], face[i + 1]};
-			this->faces.push_back(triangle);
+			this->faces.insert(this->faces.end(), triangle.begin(), triangle.end());
 		}
 	}
 }
@@ -82,9 +82,6 @@ void ObjectData::load(const char* filepath) {
 	}
 	file.close();
 	glEnableClientState(GL_VERTEX_ARRAY); // Enable vertex array functionality
-	for (const auto& face : this->faces) { // Flatten the face indices for OpenGL
-		this->flatIndices.insert(this->flatIndices.end(), face.begin(), face.end());
-	}
 	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
 	this->printInfo();
 }
@@ -92,7 +89,7 @@ void ObjectData::load(const char* filepath) {
 void ObjectData::draw() {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glVertexPointer(3, GL_FLOAT, 0, this->vertices.data()); // Set vertex pointer to the vertex data
-	glDrawElements(GL_TRIANGLES, static_cast<int>(this->flatIndices.size()), GL_UNSIGNED_INT, this->flatIndices.data()); // Draw the elements using the flat indices
+	glDrawElements(GL_TRIANGLES, static_cast<int>(this->faces.size()), GL_UNSIGNED_INT, this->faces.data()); // Draw the elements using the flat indices
 }
 
 
@@ -100,7 +97,7 @@ void ObjectData::printInfo() const {
 	std::cout << std::endl;
 	std::cout << "Object file: " << this->filename << std::endl;
 	std::cout << "Vertices: " << this->vertices.size() << std::endl;
-	std::cout << "Faces: " << this->faces.size() << std::endl;
+	std::cout << "Faces: " << this->faces.size() / 3 << std::endl;
 	std::cout << std::endl;
 	// for (const auto& vertex : this->vertices) {
 	// 	std::cout << "Vertex: " << vertex.x << ", " << vertex.y << ", " << vertex.z << std::endl;

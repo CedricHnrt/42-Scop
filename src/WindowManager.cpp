@@ -106,7 +106,7 @@ void WindowManager::render() const {
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	//TEST
+	// //TEST
 	// glMatrixMode(GL_PROJECTION);
 	// glLoadIdentity();
 	// gluPerspective(60.0, static_cast<double>(this->resolution[0]) / this->resolution[1], 0.1, 100.0); // Set perspective projection
@@ -122,8 +122,8 @@ void WindowManager::render() const {
 	// static float angle = 0.0f;
 	// angle += 1.0f; // rotation continue
 	// glRotatef(angle, 0.0f, 1.0f, 0.0f);
-	
-	//TEST
+	//
+	// //TEST
 	
 	ObjectData::getInstance().draw(); // Draw the object data
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame

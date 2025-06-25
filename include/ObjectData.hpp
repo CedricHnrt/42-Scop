@@ -26,8 +26,7 @@ class ObjectData {
 		~ObjectData() = default;
 		std::string filename;
 		std::vector<Vec3> vertices;
-		std::vector<std::vector<unsigned int>> faces;
-		std::vector<unsigned int> flatIndices; // Flat indices for openGL
+		std::vector<unsigned int> faces;
 		size_t lineIndex = 0; // For error reporting
 		void getFace(std::istringstream& iss);
 };
