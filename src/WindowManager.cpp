@@ -65,7 +65,7 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	glXMakeCurrent(this->display, this->window, context); // Make the context current
 }
 
-void WindowManager::animationLoop() {
+void WindowManager::loop() {
 	XEvent event;
 	this->running = true;
 	while (this->running) {
@@ -95,10 +95,39 @@ void WindowManager::animationLoop() {
 			}
 		}
 		//TODO: Handle rendering
-		
+		this->render();
 	}
 }
 
+#include <GL/glu.h>
+
+void WindowManager::render() const {
+	glEnable(GL_DEPTH_TEST); // REMOVE
+	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	//TEST
+	// glMatrixMode(GL_PROJECTION);
+	// glLoadIdentity();
+	// gluPerspective(60.0, static_cast<double>(this->resolution[0]) / this->resolution[1], 0.1, 100.0); // Set perspective projection
+	//
+	// glMatrixMode(GL_MODELVIEW);
+	// glLoadIdentity();
+	// gluLookAt(
+	// 	0.0, 0.0, 5.0,  // position caméra
+	// 	0.0, 0.0, 0.0,  // regarde vers le centre
+	// 	0.0, 1.0, 0.0   // up = Y
+	// );
+	//
+	// static float angle = 0.0f;
+	// angle += 1.0f; // rotation continue
+	// glRotatef(angle, 0.0f, 1.0f, 0.0f);
+	
+	//TEST
+	
+	ObjectData::getInstance().draw(); // Draw the object data
+	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
+}
 
 WindowManager& WindowManager::getInstance() {
 	static WindowManager instance;

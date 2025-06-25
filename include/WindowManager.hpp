@@ -16,7 +16,7 @@ public:
 	void* operator new(size_t) = delete;
 	void operator delete(void*) = delete;
 	void createWindow(const char *name = nullptr, const std::vector<int>& windowRes = std::vector<int>());
-	void animationLoop();
+	void loop();
 
 private:
 	Display* display = nullptr;
@@ -28,6 +28,7 @@ private:
 	std::vector<int> resolution;
 	void resolveName(const char *name);
 	void resolveResolution(const std::vector<int>& windowRes);
+	void render() const;
 	WindowManager() = default; 
 	~WindowManager();
 };
