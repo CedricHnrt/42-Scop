@@ -15,7 +15,7 @@ int main(const int argc, const char *argv[])
 		}
 		ObjectData::getInstance().load(argv[1]);
 		WindowManager::getInstance().createWindow();
-		WindowManager::getInstance().animationLoop();
+		WindowManager::getInstance().loop();
 		//TODO: Create animation loop, controls...
 		
 	}
