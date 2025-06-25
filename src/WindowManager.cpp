@@ -75,7 +75,7 @@ void WindowManager::loop() {
 				case KeyPress:
 					if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_Escape)) {
 						this->running = false; // Exit the loop on Escape key press
-						std::cout << "Escape key pressed. Exiting animation loop." << std::endl;
+						std::cout << "Escape key pressed. Exiting program." << std::endl;
 					}
 					break;
 				case ClientMessage:
@@ -94,16 +94,14 @@ void WindowManager::loop() {
 					break;
 			}
 		}
-		//TODO: Handle rendering
 		this->render();
 	}
 }
 
-#include <GL/glu.h>
+// #include <GL/glu.h>
 
 void WindowManager::render() const {
-	glEnable(GL_DEPTH_TEST); // REMOVE
-	
+	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// //TEST
@@ -124,7 +122,8 @@ void WindowManager::render() const {
 	// glRotatef(angle, 0.0f, 1.0f, 0.0f);
 	//
 	// //TEST
-	
+
+	//TODO: Handle rendering
 	ObjectData::getInstance().draw(); // Draw the object data
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
 }
