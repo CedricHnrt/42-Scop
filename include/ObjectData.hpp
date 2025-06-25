@@ -17,8 +17,9 @@ class ObjectData {
 		void* operator new(size_t) = delete;
 		void operator delete(void*) = delete;
 		void load(const char* filepath);
+		void draw();
 		void printInfo() const;
-		const std::string& getFilename() const;
+		[[nodiscard]] const std::string& getFilename() const;
     
    	private:
 		ObjectData() = default;
@@ -26,7 +27,9 @@ class ObjectData {
 		std::string filename;
 		std::vector<Vec3> vertices;
 		std::vector<std::vector<unsigned int>> faces;
-		void loadInGLBuffer();
+		std::vector<unsigned int> flatIndices; // Flat indices for openGL
+		size_t lineIndex = 0; // For error reporting
+		void getFace(std::istringstream& iss);
 };
 
 #endif //OBJECTDATA_HPP

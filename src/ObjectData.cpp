@@ -1,5 +1,8 @@
 #include "ObjectData.hpp"
 
+#include <GL/gl.h>
+#include <GL/glx.h>
+
 static void checkFilename(const char* filename) {
 	if (filename == nullptr || filename[0] == '\0')
 		throw NoArgException();
@@ -12,10 +15,44 @@ static std::string prepareFilename(const std::string& filepath) {
 	return filepath.substr(filepath.find_last_of("\\/") + 1);
 }
 
-void ObjectData::loadInGLBuffer() {
-	
+void ObjectData::getFace(std::istringstream& iss) {
+	std::vector<unsigned int> face;
+	std::string part;
+	while (iss >> part) { // Read each part of the face definition
+		std::istringstream pss(part);
+		std::string vIndexString;
+		std::getline(pss, vIndexString, '/'); // Ignore texture and normal indices
+		try {
+			face.push_back(std::stoi(vIndexString) - 1); // OBJ indices are 1-based
+		}
+		catch (const std::invalid_argument& e) {
+			std::cerr << YELLOW << "WARNING: Invalid vertex index: " << vIndexString << RESET << std::endl;
+			std::cerr << "Line " << this->lineIndex << std::endl;
+			face.clear();
+			break;
+		}
+		catch (const std::out_of_range& e) {
+			std::cerr << YELLOW << "WARNING: Vertex index out of range: " << vIndexString << RESET << std::endl;
+			std::cerr << "Line " << this->lineIndex << std::endl;
+			face.clear();
+			break;
+		}
+	}
+	if (face.size() == 3) {
+		this->faces.push_back(face);
+	}
+	else if (face.size() < 3) { // Ensure at least a triangle
+		std::cerr << YELLOW << "WARNING: Face with less than 3 vertices found, skipping." << RESET << std::endl;
+		std::cerr << "Line " << this->lineIndex << std::endl;
+	}
+	else { // Handle polygons with more than 3 vertices
+		// Triangulate the polygon
+		for (size_t i = 1; i < face.size() - 1; ++i) {
+			std::vector triangle = {face[0], face[i], face[i + 1]};
+			this->faces.push_back(triangle);
+		}
+	}
 }
-
 
 void ObjectData::load(const char* filepath) {
 	checkFilename(filepath);
@@ -27,9 +64,8 @@ void ObjectData::load(const char* filepath) {
 		throw UnableToOpenFileException();
 	
 	std::string line;
-	size_t lineIndex = 0; // Line index for error reporting
 	while (std::getline(file, line)) {
-		lineIndex++;
+		this->lineIndex++;
 		if (line.empty() || line[0] == '#')
 			continue;
 		std::istringstream iss(line);
@@ -41,48 +77,24 @@ void ObjectData::load(const char* filepath) {
 			this->vertices.push_back(vertex);
 		}
 		else if (type == "f") {	//Face indices
-			std::vector<unsigned int> face;
-			std::string part;
-			while (iss >> part) { // Read each part of the face definition
-				std::istringstream pss(part);
-				std::string vIndexString;
-				std::getline(pss, vIndexString, '/'); // Ignore texture and normal indices
-				try {
-					face.push_back(std::stoi(vIndexString) - 1); // OBJ indices are 1-based
-				}
-				catch (const std::invalid_argument& e) {
-					std::cerr << YELLOW << "WARNING: Invalid vertex index: " << vIndexString << RESET << std::endl;
-					std::cerr << "Line " << lineIndex << std::endl;
-					face.clear();
-					break;
-				}
-				catch (const std::out_of_range& e) {
-					std::cerr << YELLOW << "WARNING: Vertex index out of range: " << vIndexString << RESET << std::endl;
-					std::cerr << "Line " << lineIndex << std::endl;
-					face.clear();
-					break;
-				}
-			}
-			if (face.size() == 3) {
-				this->faces.push_back(face);
-			}
-			else if (face.size() < 3) { // Ensure at least a triangle
-				std::cerr << YELLOW << "WARNING: Face with less than 3 vertices found, skipping." << RESET << std::endl;
-				std::cerr << "Line " << lineIndex << std::endl;
-			}
-			else { // Handle polygons with more than 3 vertices
-				// Triangulate the polygon
-				for (size_t i = 1; i < face.size() - 1; ++i) {
-					std::vector triangle = {face[0], face[i], face[i + 1]};
-					this->faces.push_back(triangle);
-				}
-			}
+			this->getFace(iss);
 		}
 	}
 	file.close();
+	glEnableClientState(GL_VERTEX_ARRAY); // Enable vertex array functionality
+	for (const auto& face : this->faces) { // Flatten the face indices for OpenGL
+		this->flatIndices.insert(this->flatIndices.end(), face.begin(), face.end());
+	}
 	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
 	this->printInfo();
 }
+
+void ObjectData::draw() {
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, this->vertices.data()); // Set vertex pointer to the vertex data
+	glDrawElements(GL_TRIANGLES, static_cast<int>(this->flatIndices.size()), GL_UNSIGNED_INT, this->flatIndices.data()); // Draw the elements using the flat indices
+}
+
 
 void ObjectData::printInfo() const {
 	std::cout << std::endl;
