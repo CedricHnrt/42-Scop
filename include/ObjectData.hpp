@@ -8,6 +8,8 @@
 #include "exceptionTypes.hpp"
 #include "ansiCodes.hpp"
 #include "vectors.hpp"
+#include <GL/gl.h>
+
 
 class ObjectData {
   	public:

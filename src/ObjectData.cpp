@@ -1,8 +1,5 @@
 #include "ObjectData.hpp"
 
-#include <GL/gl.h>
-#include <GL/glx.h>
-
 static void checkFilename(const char* filename) {
 	if (filename == nullptr || filename[0] == '\0')
 		throw NoArgException();
@@ -92,29 +89,17 @@ void ObjectData::draw() {
 	glDrawElements(GL_TRIANGLES, static_cast<int>(this->faces.size()), GL_UNSIGNED_INT, this->faces.data()); // Draw the elements using the flat indices
 }
 
-
 void ObjectData::printInfo() const {
 	std::cout << std::endl;
 	std::cout << "Object file: " << this->filename << std::endl;
 	std::cout << "Vertices: " << this->vertices.size() << std::endl;
 	std::cout << "Faces: " << this->faces.size() / 3 << std::endl;
 	std::cout << std::endl;
-	// for (const auto& vertex : this->vertices) {
-	// 	std::cout << "Vertex: " << vertex.x << ", " << vertex.y << ", " << vertex.z << std::endl;
-	// }
-	// for (const auto& face : this->faces) {
-	// 	std::cout << "Face: ";
-	// 	for (const auto& index : face) {
-	// 		std::cout << index + 1 << " "; // Convert back to 1-based index for display
-	// 	}
-	// 	std::cout << std::endl;
-	// }
 }
 
 const std::string& ObjectData::getFilename() const {
 	return this->filename;
 }
-
 
 ObjectData& ObjectData::getInstance() {
 	static ObjectData instance;
