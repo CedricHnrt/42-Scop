@@ -7,7 +7,7 @@
 #include <sstream>
 #include "exceptionTypes.hpp"
 #include "ansiCodes.hpp"
-#include "vectors.hpp"
+#include "matrix.hpp"
 #include <GL/gl.h>
 
 
