@@ -7,6 +7,7 @@
 #include <GL/glx.h>
 #include <string>
 #include "ObjectData.hpp"
+#include "matrix.hpp"
 
 class WindowManager {
 public:
@@ -20,7 +21,8 @@ public:
 
 private:
 	Display* display = nullptr;
-	Window window;
+	Window window{};
+	Mat4 projectionMatrix = Mat4::identity();
 	long wmDelete = None;
 	bool running = false;
 	int screen = 0;

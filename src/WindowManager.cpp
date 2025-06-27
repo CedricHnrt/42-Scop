@@ -87,7 +87,10 @@ void WindowManager::loop() {
 				case Expose:
 					if (event.xexpose.count == 0) {
 						std::cout << "Window exposed. Redrawing..." << std::endl; // Handle window exposure
-						//TODO: handle window exposure, e.g., redraw the scene
+						glMatrixMode(GL_PROJECTION);
+						this->projectionMatrix = Mat4::perpective(60.0f,
+							static_cast<float>(this->resolution[0]) / static_cast<float>(this->resolution[1]),
+							0.1f, 100.0f);
 					}
 					break;
 				default: std::cout << "Unhandled event type: " << event.type << std::endl; // Log unhandled events
@@ -124,6 +127,9 @@ void WindowManager::render() const {
 	// //TEST
 
 	//TODO: Handle rendering
+
+	
+	
 	ObjectData::getInstance().draw(); // Draw the object data
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
 }
