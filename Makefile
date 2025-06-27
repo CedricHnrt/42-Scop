@@ -18,7 +18,8 @@ MKDIR = @mkdir -p
 PRINT = @echo
 FILES =	main			\
 		ObjectData		\
-		WindowManager
+		WindowManager	\
+		matrix
 OBJ_DIR = obj/
 BIN_DIR = bin/
 
@@ -53,7 +54,7 @@ ifeq ($(wildcard $(BIN_DIR)$(NAME)), $(BIN_DIR)$(NAME))
 endif
 
 valgrind: all
-	@valgrind --leak-check=full --suppressions=/usr/lib/valgrind/default.supp --track-origins=yes ./bin/$(NAME) assets/42.obj
+	@valgrind --leak-check=full --track-origins=yes ./bin/$(NAME) assets/42.obj
 
 
 re: fclean all
