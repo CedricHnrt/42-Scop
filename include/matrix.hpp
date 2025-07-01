@@ -20,10 +20,10 @@ class Mat4 {
 		explicit Mat4(const float[16]);
 		static Mat4 identity();
 		static Mat4 perpective(float fov, float aspect, float near, float far); // FOV in angles, converted in radians internally
+		static Mat4 rotateY(float angle);
 		static Mat4 lookAt(const Vec3 &eye, const Vec3 &center, const Vec3 &up);
 		Mat4 operator*(const Mat4& other) const;
 		[[nodiscard]] const float* data() const;
-		void printMatrix() const;
 
 	private:
 		float m[16]{};

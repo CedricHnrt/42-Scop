@@ -24,6 +24,8 @@ private:
 	Window window{};
 	Mat4 projectionMatrix = Mat4::identity();
 	Mat4 viewMatrix = Mat4::identity();
+	Mat4 modelMatrix = Mat4::identity();
+	float rotationAngle = 0.0f; // For rotation animation
 	long wmDelete = None;
 	bool running = false;
 	int screen = 0;

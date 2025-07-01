@@ -133,10 +133,11 @@ void WindowManager::render() {
 	glMatrixMode(GL_MODELVIEW);
 	this->viewMatrix = Mat4::lookAt(Vec3(0.0f, 0.0f, 5.0f), Vec3(0.0f, 0.0f, 0.0f),
 		Vec3(0.0f, 1.0f, 0.0f));
-	glLoadIdentity(); // Reset the modelview matrix
-	glLoadMatrixf(this->viewMatrix.data());
-	
-	ObjectData::getInstance().draw(); // Draw the object data
+	this->rotationAngle += 0.01f; // Increment the rotation angle for animation
+	this->modelMatrix = Mat4::rotateY(this->rotationAngle);
+	glLoadIdentity();
+	glLoadMatrixf((this->viewMatrix * this->modelMatrix).data()); // Load the combined projection and view matrix
+	ObjectData::getInstance().draw();
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
 }
 

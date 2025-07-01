@@ -1,7 +1,5 @@
 #include "matrix.hpp"
 
-#include <bits/error_constants.h>
-
 Vec3 Vec3::cross(const Vec3 &a, const Vec3 &b) {
 	return {
 		a.y * b.z - a.z * b.y,
@@ -54,6 +52,19 @@ Mat4 Mat4::perpective(float fov, const float aspect, const float near, const flo
 	return Mat4(perspective);
 }
 
+Mat4 Mat4::rotateY(float angle) {
+	const float c = cosf(angle);
+	const float s = sinf(angle);
+
+	const float rotationY[16] = {
+		c, 0, s, 0,
+		0, 1, 0, 0,
+		-s, 0, c, 0,
+		0, 0, 0, 1};
+	return Mat4(rotationY);
+}
+
+
 Mat4 Mat4::lookAt(const Vec3 &eye, const Vec3 &center, const Vec3 &up) {
 	const Vec3 f = Vec3::normalize(center - eye);
 	const Vec3 s = Vec3::normalize(Vec3::cross(f, up));
@@ -73,9 +84,9 @@ Mat4 Mat4::operator*(const Mat4& other) const {
 	float result[16];
 	for (int row = 0; row < 4; ++row) {
 		for (int col = 0; col < 4; ++col) {
-			result[row * 4 + col] = 0;
+			result[col * 4 + row] = 0;
 			for (int k = 0; k < 4; ++k) {
-				result[row * 4 + col] += this->m[row * 4 + k] * other.m[k * 4 + col];
+				result[col * 4 + row] += this->m[k * 4 + row] * other.m[col * 4 + k];
 			}
 		}
 	}
@@ -89,15 +100,4 @@ const float *Mat4::data() const {
 Mat4::Mat4(const float value[16]) {
 	for (int i = 0; i < 16; i++)
 		m[i] = value[i];
-}
-
-#include <iostream>
-
-void Mat4::printMatrix() const {
-	for (int row = 0; row < 4; ++row) {
-		for (int col = 0; col < 4; ++col) {
-			std::cout << this->m[col * 4 + row] << " ";
-		}
-		std::cout << "\n";
-	}
 }
