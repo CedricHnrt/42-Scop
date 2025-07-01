@@ -109,27 +109,6 @@ void WindowManager::render() {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// //TEST
-	// glMatrixMode(GL_PROJECTION);
-	// glLoadIdentity();
-	// gluPerspective(60.0, static_cast<double>(this->resolution[0]) / this->resolution[1], 0.1, 100.0); // Set perspective projection
-	//
-	// glMatrixMode(GL_MODELVIEW);
-	// glLoadIdentity();
-	// gluLookAt(
-	// 	0.0, 0.0, 5.0,  // position caméra
-	// 	0.0, 0.0, 0.0,  // regarde vers le centre
-	// 	0.0, 1.0, 0.0   // up = Y
-	// );
-	//
-	// static float angle = 0.0f;
-	// angle += 1.0f; // rotation continue
-	// glRotatef(angle, 0.0f, 1.0f, 0.0f);
-	//
-	// //TEST
-
-	//TODO: Handle rendering
-
 	glMatrixMode(GL_MODELVIEW);
 	this->viewMatrix = Mat4::lookAt(Vec3(0.0f, 0.0f, 5.0f), Vec3(0.0f, 0.0f, 0.0f),
 		Vec3(0.0f, 1.0f, 0.0f));
@@ -139,6 +118,13 @@ void WindowManager::render() {
 	glLoadMatrixf((this->viewMatrix * this->modelMatrix).data()); // Load the combined projection and view matrix
 	ObjectData::getInstance().draw();
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
+
+	//TODO: limit to 60 FPS
+	//TODO: handle model translation with keyboard input
+	//TODO: center the model in the window
+	//TODO: handle model scaling on window resize
+	//TODO: set color on model and texture on keyboard input
+	//TODO: OPTIONAL: handle mouse input for model scaling
 }
 
 WindowManager& WindowManager::getInstance() {
