@@ -29,7 +29,7 @@ DEP = $(addsuffix .d, $(addprefix $(OBJ_DIR), $(FILES)))
 bin/$(NAME): $(OBJ)
 	$(MKDIR) $(BIN_DIR)
 	$(PRINT) "\n${_YELLOW}Making $(NAME)...${_END}"
-	$(CC) $(OBJ) -o $(BIN_DIR)$(NAME) -lGL -lGLU -lX11
+	$(CC) $(OBJ) -o $(BIN_DIR)$(NAME) -lGL -lGLX -lX11
 	$(PRINT) "${_BOLD}${_GREEN}$(NAME) done.\a${_END}"
 
 obj/%.o: src/%.cpp Makefile
