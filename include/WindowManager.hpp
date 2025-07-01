@@ -23,6 +23,7 @@ private:
 	Display* display = nullptr;
 	Window window{};
 	Mat4 projectionMatrix = Mat4::identity();
+	Mat4 viewMatrix = Mat4::identity();
 	long wmDelete = None;
 	bool running = false;
 	int screen = 0;
@@ -30,7 +31,7 @@ private:
 	std::vector<int> resolution;
 	void resolveName(const char *name);
 	void resolveResolution(const std::vector<int>& windowRes);
-	void render() const;
+	void render();
 	WindowManager() = default; 
 	~WindowManager();
 };

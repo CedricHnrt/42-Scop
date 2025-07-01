@@ -30,7 +30,7 @@ void WindowManager::resolveResolution(const std::vector<int>& windowRes) {
 void WindowManager::createWindow(const char *name, const std::vector<int>& windowRes) {
 	this->display = XOpenDisplay(nullptr); // Open the default X display
 	if (!display) {
-		throw std::runtime_error("Failed to open X display");
+		throw RuntimeException("Failed to open X display");
 	}
 	this->screen = DefaultScreen(this->display); // Get the default screen
 
@@ -40,7 +40,7 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	int visualAttribs[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None}; // Attributes for the visual
 	XVisualInfo* visual = glXChooseVisual(this->display, this->screen, visualAttribs); // Choose a visual that supports OpenGL
 	if (!visual) {
-		throw std::runtime_error("Failed to get a visual from X screen");
+		throw RuntimeException("Failed to get a visual from X screen");
 	}
 	const Window root = RootWindow(this->display, this->screen); // Get the root window of the screen
 	Colormap colormap = XCreateColormap(this->display, root, visual->visual, AllocNone); // Create a colormap for the visual
@@ -55,7 +55,7 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	XMapWindow(this->display, this->window); // Map the window to the screen
 	GLXContext context = glXCreateContext(this->display, visual, nullptr, GL_TRUE);
 	if (!context) {
-		throw std::runtime_error("Failed to create OpenGL context");
+		throw RuntimeException("Failed to create OpenGL context");
 	}
 
 	Atom wmDelete = XInternAtom(this->display, "WM_DELETE_WINDOW", False); // Create a delete window atom
@@ -91,6 +91,8 @@ void WindowManager::loop() {
 						this->projectionMatrix = Mat4::perpective(60.0f,
 							static_cast<float>(this->resolution[0]) / static_cast<float>(this->resolution[1]),
 							0.1f, 100.0f);
+						glLoadIdentity(); // Reset the projection matrix
+						glLoadMatrixf(this->projectionMatrix.data()); // Load the projection matrix
 					}
 					break;
 				default: std::cout << "Unhandled event type: " << event.type << std::endl; // Log unhandled events
@@ -103,7 +105,7 @@ void WindowManager::loop() {
 
 // #include <GL/glu.h>
 
-void WindowManager::render() const {
+void WindowManager::render() {
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -128,7 +130,11 @@ void WindowManager::render() const {
 
 	//TODO: Handle rendering
 
-	
+	glMatrixMode(GL_MODELVIEW);
+	this->viewMatrix = Mat4::lookAt(Vec3(0.0f, 0.0f, 5.0f), Vec3(0.0f, 0.0f, 0.0f),
+		Vec3(0.0f, 1.0f, 0.0f));
+	glLoadIdentity(); // Reset the modelview matrix
+	glLoadMatrixf(this->viewMatrix.data());
 	
 	ObjectData::getInstance().draw(); // Draw the object data
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
