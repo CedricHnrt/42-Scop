@@ -16,8 +16,6 @@ int main(const int argc, const char *argv[])
 		ObjectData::getInstance().load(argv[1]);
 		WindowManager::getInstance().createWindow();
 		WindowManager::getInstance().loop();
-		//TODO: Create animation loop, controls...
-		
 	}
 	catch (const std::exception& e) {
 		std::cerr << RED << e.what() << RESET << std::endl;
