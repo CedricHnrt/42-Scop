@@ -54,12 +54,8 @@ ifeq ($(wildcard $(BIN_DIR)$(NAME)), $(BIN_DIR)$(NAME))
 	$(PRINT) "${_GREEN}$(NAME) deleted.\a${_END}"
 endif
 
-valgrind: all
-	@valgrind --leak-check=full --track-origins=yes ./bin/$(NAME) assets/42.obj
-
-
 re: fclean all
 
-.PHONY: all clean fclean re valgrind
+.PHONY: all clean fclean re
 
 -include $(DEP)
