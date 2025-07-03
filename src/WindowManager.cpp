@@ -114,14 +114,12 @@ void WindowManager::render() {
 	glMatrixMode(GL_MODELVIEW);
 	this->viewMatrix = Mat4::lookAt(Vec3(0.0f, 0.0f, 5.0f), Vec3(0.0f, 0.0f, 0.0f),
 		Vec3(0.0f, 1.0f, 0.0f));
-	this->rotationAngle += 1.0f * FrameTimer::getInstance().getDeltaTime(); // Increment rotation angle based on delta time
+	this->rotationAngle += 1.05f * FrameTimer::getInstance().getDeltaTime(); // Increment rotation angle based on delta time
 	this->modelMatrix = Mat4::rotateY(this->rotationAngle);
 	glLoadIdentity();
 	glLoadMatrixf((this->viewMatrix * this->modelMatrix).data()); // Load the combined projection and view matrix
 	ObjectData::getInstance().draw();
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
-
-	
 
 	//TODO: limit to 60 FPS
 	//TODO: handle model translation with keyboard input
