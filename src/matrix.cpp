@@ -1,4 +1,5 @@
 #include "matrix.hpp"
+#include "../include/matrix.hpp" // REMOVE
 
 Vec3 Vec3::cross(const Vec3 &a, const Vec3 &b) {
 	return {
@@ -27,6 +28,21 @@ Vec3 Vec3::operator+(const Vec3& rhs) const {
 Vec3 Vec3::operator-(const Vec3& rhs) const {
 	return {this->x - rhs.x, this->y - rhs.y, this->z - rhs.z};
 }
+
+Vec3& Vec3::operator+=(const Vec3& rhs) {
+	this->x += rhs.x;
+	this->y += rhs.y;
+	this->z += rhs.z;
+	return *this;
+}
+
+Vec3 &Vec3::operator/=(const float rhs) {
+	this->x /= rhs;
+	this->y /= rhs;
+	this->z /= rhs;
+	return *this;
+}
+
 
 Mat4 Mat4::identity() {
 	const float identity[16] = {
@@ -71,9 +87,9 @@ Mat4 Mat4::lookAt(const Vec3 &eye, const Vec3 &center, const Vec3 &up) {
 	const Vec3 u = Vec3::cross(s, f);
 	
 	const float lookAt[16] = {
-		s.x,						u.x,						-f.x,						0,
-		s.y,						u.y,						-f.y,						0,
-		s.z,						u.z,						-f.z,						0,
+		s.x,				u.x,				-f.x,				0,
+		s.y,				u.y,				-f.y,				0,
+		s.z,				u.z,				-f.z,				0,
 		-Vec3::dot(s, eye),	-Vec3::dot(u, eye),	Vec3::dot(f, eye),	1};
 
 	return Mat4(lookAt);
