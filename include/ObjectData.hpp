@@ -29,8 +29,10 @@ class ObjectData {
 		std::string filename;
 		std::vector<Vec3> vertices;
 		std::vector<unsigned int> faces;
+		Vec3 center{0.0f, 0.0f, 0.0f}; // Center of the object
 		size_t lineIndex = 0; // For error reporting
 		void getFace(std::istringstream& iss);
+		void computeCenter();
 };
 
 #endif //OBJECTDATA_HPP

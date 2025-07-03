@@ -51,6 +51,16 @@ void ObjectData::getFace(std::istringstream& iss) {
 	}
 }
 
+void ObjectData::computeCenter() {
+	for (const auto& vertex : this->vertices) {
+		this->center = vertex + this->center;
+	}
+	this->center /= static_cast<float>(this->vertices.size()); // Average to find the center
+	for (auto& vertex : this->vertices) {
+		vertex = vertex - this->center; // Center the vertices around the origin
+	}
+}
+
 void ObjectData::load(const char* filepath) {
 	checkFilename(filepath);
 	this->filename = prepareFilename(filepath); // Extract filename from path
@@ -79,6 +89,7 @@ void ObjectData::load(const char* filepath) {
 	}
 	file.close();
 	glEnableClientState(GL_VERTEX_ARRAY); // Enable vertex array functionality
+	this->computeCenter();
 	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
 	this->printInfo();
 }
