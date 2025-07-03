@@ -86,7 +86,6 @@ void WindowManager::loop() {
 					break;
 				case Expose:
 					if (event.xexpose.count == 0) {
-						std::cout << "Window exposed. Redrawing..." << std::endl; // Handle window exposure
 						glMatrixMode(GL_PROJECTION);
 						this->projectionMatrix = Mat4::perpective(60.0f,
 							static_cast<float>(this->resolution[0]) / static_cast<float>(this->resolution[1]),
@@ -95,15 +94,13 @@ void WindowManager::loop() {
 						glLoadMatrixf(this->projectionMatrix.data()); // Load the projection matrix
 					}
 					break;
-				default: std::cout << "Unhandled event type: " << event.type << std::endl; // Log unhandled events
+				default: std::cerr << "Unhandled event type: " << event.type << std::endl; // Log unhandled events
 					break;
 			}
 		}
 		this->render();
 	}
 }
-
-// #include <GL/glu.h>
 
 void WindowManager::render() {
 	FrameTimer::getInstance().update();
@@ -120,10 +117,8 @@ void WindowManager::render() {
 	glLoadMatrixf((this->viewMatrix * this->modelMatrix).data()); // Load the combined projection and view matrix
 	ObjectData::getInstance().draw();
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
-
-	//TODO: limit to 60 FPS
+	
 	//TODO: handle model translation with keyboard input
-	//TODO: center the model in the window
 	//TODO: handle model scaling on window resize
 	//TODO: set color on model and texture on keyboard input
 	//TODO: OPTIONAL: handle mouse input for model scaling
