@@ -8,6 +8,7 @@
 #include <string>
 #include "ObjectData.hpp"
 #include "matrix.hpp"
+#include "FrameTimer.hpp"
 
 class WindowManager {
 public:

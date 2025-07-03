@@ -19,7 +19,8 @@ PRINT = @echo
 FILES =	main			\
 		ObjectData		\
 		WindowManager	\
-		matrix
+		matrix			\
+		FrameTimer
 OBJ_DIR = obj/
 BIN_DIR = bin/
 
