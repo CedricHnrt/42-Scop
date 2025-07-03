@@ -15,7 +15,7 @@ class FrameTimer {
 		FrameTimer& operator=(const FrameTimer&) = delete;
 		void* operator new(size_t) = delete;
 		void operator delete(void*) = delete;
-		float getDeltaTime() const;
+		[[nodiscard]] float getDeltaTime() const;
 		void update();
 
 	private:
