@@ -46,7 +46,7 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	Colormap colormap = XCreateColormap(this->display, root, visual->visual, AllocNone); // Create a colormap for the visual
 	XSetWindowAttributes attributes;
 	attributes.colormap = colormap;
-	attributes.event_mask = ExposureMask | KeyPressMask;
+	attributes.event_mask = ExposureMask | KeyPressMask | StructureNotifyMask; // Set the event mask for the window
 	
 	this->window = XCreateWindow(this->display, root, 0, 0, this->resolution[0], this->resolution[1], 0,
 			visual->depth, InputOutput, visual->visual, CWColormap | CWEventMask, &attributes); // Create the window
@@ -65,6 +65,15 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	glXMakeCurrent(this->display, this->window, context); // Make the context current
 }
 
+void WindowManager::updateProjectionMatrix() {
+	glMatrixMode(GL_PROJECTION);
+	this->projectionMatrix = Mat4::perpective(60.0f,
+		static_cast<float>(this->resolution[0]) / static_cast<float>(this->resolution[1]),
+		0.1f, 100.0f);
+	glLoadIdentity(); // Reset the projection matrix
+	glLoadMatrixf(this->projectionMatrix.data());
+}
+
 void WindowManager::loop() {
 	XEvent event;
 	this->running = true;
@@ -74,28 +83,28 @@ void WindowManager::loop() {
 			switch (event.type) {
 				case KeyPress:
 					if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_Escape)) {
-						this->running = false; // Exit the loop on Escape key press
+						this->running = false;
 						std::cout << "Escape key pressed. Exiting program." << std::endl;
 					}
 					break;
 				case ClientMessage:
 					if (event.xclient.data.l[0] == this->wmDelete) {
-						this->running = false; // Exit the loop on window close request
+						this->running = false;
 						std::cout << "Window close requested." << std::endl;
 					}
 					break;
 				case Expose:
 					if (event.xexpose.count == 0) {
-						glMatrixMode(GL_PROJECTION);
-						this->projectionMatrix = Mat4::perpective(60.0f,
-							static_cast<float>(this->resolution[0]) / static_cast<float>(this->resolution[1]),
-							0.1f, 100.0f);
-						glLoadIdentity(); // Reset the projection matrix
-						glLoadMatrixf(this->projectionMatrix.data()); // Load the projection matrix
+						this->updateProjectionMatrix();
 					}
 					break;
-				default: std::cerr << "Unhandled event type: " << event.type << std::endl; // Log unhandled events
+				case ConfigureNotify:
+					this->resolution[0] = event.xconfigure.width;
+					this->resolution[1] = event.xconfigure.height;
+					glViewport(0, 0, this->resolution[0], this->resolution[1]);
+					this->updateProjectionMatrix();
 					break;
+				default: break;
 			}
 		}
 		this->render();
@@ -104,6 +113,9 @@ void WindowManager::loop() {
 
 void WindowManager::render() {
 	FrameTimer::getInstance().update();
+	if (this->paused) {
+		return;
+	}
 	
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -119,7 +131,6 @@ void WindowManager::render() {
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
 	
 	//TODO: handle model translation with keyboard input
-	//TODO: handle model scaling on window resize
 	//TODO: set color on model and texture on keyboard input
 	//TODO: OPTIONAL: handle mouse input for model scaling
 }

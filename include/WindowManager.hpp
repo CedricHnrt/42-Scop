@@ -29,11 +29,13 @@ private:
 	float rotationAngle = 0.0f; // For rotation animation
 	long wmDelete = None;
 	bool running = false;
+	bool paused = false;
 	int screen = 0;
 	std::string name;
 	std::vector<int> resolution;
 	void resolveName(const char *name);
 	void resolveResolution(const std::vector<int>& windowRes);
+	void updateProjectionMatrix();
 	void render();
 	WindowManager() = default; 
 	~WindowManager();
