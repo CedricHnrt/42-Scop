@@ -29,7 +29,6 @@ private:
 	float rotationAngle = 0.0f; // For rotation animation
 	long wmDelete = None;
 	bool running = false;
-	bool paused = false;
 	int screen = 0;
 	std::string name;
 	std::vector<int> resolution;
@@ -37,8 +36,4 @@ private:
 	void resolveResolution(const std::vector<int>& windowRes);
 	void updateProjectionMatrix();
 	void render();
-	WindowManager() = default; 
-	~WindowManager();
-};
-
-#endif //WINDOWMANAGER_HPP
+	WindowManager() = de

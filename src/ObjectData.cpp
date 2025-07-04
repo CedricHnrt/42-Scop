@@ -61,6 +61,21 @@ void ObjectData::computeCenter() {
 	}
 }
 
+void ObjectData::computeAttributes() {
+	for (unsigned int i = 0; i < this->faces.size(); i += 3) { 
+		const float shade = (i / 3 % 10) / 10.0f; 
+		for (int j = 0; j < 3; ++j) {
+			const unsigned int index = this->faces[i + j]; 
+			const Vec3 vertex = this->vertices[index]; 
+			VertexAttrib attrib; 
+			attrib.position = vertex; 
+			attrib.color = Vec3(shade, shade, shade);
+			this->attributes.push_back(attrib); 
+			this->indices.push_back(this->indices.size()); // Maintain a flat index for OpenGL
+		}
+	}
+}
+
 void ObjectData::load(const char* filepath) {
 	checkFilename(filepath);
 	this->filename = prepareFilename(filepath); // Extract filename from path
@@ -90,29 +105,4 @@ void ObjectData::load(const char* filepath) {
 	file.close();
 	glEnableClientState(GL_VERTEX_ARRAY); // Enable vertex array functionality
 	this->computeCenter();
-	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
-	this->printInfo();
-}
-
-void ObjectData::draw() {
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, this->vertices.data()); // Set vertex pointer to the vertex data
-	glDrawElements(GL_TRIANGLES, static_cast<int>(this->faces.size()), GL_UNSIGNED_INT, this->faces.data()); // Draw the elements using the flat indices
-}
-
-void ObjectData::printInfo() const {
-	std::cout << std::endl;
-	std::cout << "Object file: " << this->filename << std::endl;
-	std::cout << "Vertices: " << this->vertices.size() << std::endl;
-	std::cout << "Faces: " << this->faces.size() / 3 << std::endl;
-	std::cout << std::endl;
-}
-
-const std::string& ObjectData::getFilename() const {
-	return this->filename;
-}
-
-ObjectData& ObjectData::getInstance() {
-	static ObjectData instance;
-	return instance;
-}
+	this->computeAt

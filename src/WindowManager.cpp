@@ -113,17 +113,15 @@ void WindowManager::loop() {
 
 void WindowManager::render() {
 	FrameTimer::getInstance().update();
-	if (this->paused) {
-		return;
-	}
 	
 	glEnable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	this->viewMatrix = Mat4::lookAt(Vec3(0.0f, 0.0f, 5.0f), Vec3(0.0f, 0.0f, 0.0f),
 		Vec3(0.0f, 1.0f, 0.0f));
-	this->rotationAngle += 1.05f * FrameTimer::getInstance().getDeltaTime(); // Increment rotation angle based on delta time
+	this->rotationAngle += 1.00f * FrameTimer::getInstance().getDeltaTime(); // Increment rotation angle based on delta time
 	this->modelMatrix = Mat4::rotateY(this->rotationAngle);
 	glLoadIdentity();
 	glLoadMatrixf((this->viewMatrix * this->modelMatrix).data()); // Load the combined projection and view matrix
@@ -131,7 +129,7 @@ void WindowManager::render() {
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
 	
 	//TODO: handle model translation with keyboard input
-	//TODO: set color on model and texture on keyboard input
+	//TODO: set texture on keyboard input
 	//TODO: OPTIONAL: handle mouse input for model scaling
 }
 
@@ -146,7 +144,4 @@ WindowManager::~WindowManager() {
 		XFreeColormap(this->display, DefaultColormap(this->display, this->screen)); // Free the colormap
 	}
 	glXDestroyContext(this->display, glXGetCurrentContext()); // Destroy the OpenGL context
-	XDestroyWindow(this->display, this->window);
-	if (this->display)
-		XCloseDisplay(display);
-}
+	

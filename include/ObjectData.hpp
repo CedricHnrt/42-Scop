@@ -10,6 +10,10 @@
 #include "matrix.hpp"
 #include <GL/gl.h>
 
+struct VertexAttrib {
+	Vec3 position;
+	Vec3 color;
+};
 
 class ObjectData {
   	public:
@@ -19,7 +23,7 @@ class ObjectData {
 		void* operator new(size_t) = delete;
 		void operator delete(void*) = delete;
 		void load(const char* filepath);
-		void draw();
+		void draw() const;
 		void printInfo() const;
 		[[nodiscard]] const std::string& getFilename() const;
     
@@ -29,10 +33,4 @@ class ObjectData {
 		std::string filename;
 		std::vector<Vec3> vertices;
 		std::vector<unsigned int> faces;
-		Vec3 center{0.0f, 0.0f, 0.0f}; // Center of the object
-		size_t lineIndex = 0; // For error reporting
-		void getFace(std::istringstream& iss);
-		void computeCenter();
-};
-
-#endif //OBJECTDATA_HPP
+		std::vector<VertexAttrib> attributes; // Attributes fo
