@@ -35,5 +35,10 @@ private:
 	void resolveName(const char *name);
 	void resolveResolution(const std::vector<int>& windowRes);
 	void updateProjectionMatrix();
+	void keyHandler(const XEvent& event);
 	void render();
-	WindowManager() = de
+	WindowManager() = default; 
+	~WindowManager();
+};
+
+#endif //WINDOWMANAGER_HPP

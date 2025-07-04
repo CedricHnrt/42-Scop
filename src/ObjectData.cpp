@@ -105,4 +105,69 @@ void ObjectData::load(const char* filepath) {
 	file.close();
 	glEnableClientState(GL_VERTEX_ARRAY); // Enable vertex array functionality
 	this->computeCenter();
-	this->computeAt
+	this->computeAttributes();
+	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
+	this->printInfo();
+}
+
+void ObjectData::draw() const {
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	
+	glVertexPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].position); // Set vertex pointer to the position attribute
+	glColorPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].color); // Set color pointer to the color attribute
+	
+	glDrawElements(GL_TRIANGLES, static_cast<int>(this->indices.size()), GL_UNSIGNED_INT, this->indices.data()); // Draw the elements using the flat indices
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
+void ObjectData::moveObject(const int direction) {
+	switch (direction) {
+		case CENTER:
+			this->position = Vec3(0.0f, 0.0f, 0.0f);
+			break;
+		case UP:
+			this->position.y += 0.1f;
+			break;
+		case DOWN:
+			this->position.y -= 0.1f;
+			break;
+		case LEFT:
+			this->position.x -= 0.1f;
+			break;
+		case RIGHT:
+			this->position.x += 0.1f;
+			break;
+		case FORWARD:
+			this->position.z += 0.1f;
+			break;
+		case BACKWARD:
+			this->position.z -= 0.1f;
+			break;
+		default:
+			break;
+	}
+}
+
+
+void ObjectData::printInfo() const {
+	std::cout << std::endl;
+	std::cout << "Object file: " << this->filename << std::endl;
+	std::cout << "Vertices: " << this->vertices.size() << std::endl;
+	std::cout << "Faces: " << this->faces.size() / 3 << std::endl;
+	std::cout << std::endl;
+}
+
+const std::string& ObjectData::getFilename() const {
+	return this->filename;
+}
+
+const Vec3& ObjectData::getPosition() const {
+	return this->position;
+}
+
+ObjectData& ObjectData::getInstance() {
+	static ObjectData instance;
+	return instance;
+}

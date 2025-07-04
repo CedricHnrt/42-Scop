@@ -67,11 +67,31 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 
 void WindowManager::updateProjectionMatrix() {
 	glMatrixMode(GL_PROJECTION);
-	this->projectionMatrix = Mat4::perpective(60.0f,
+	this->projectionMatrix = Mat4::perspective(60.0f,
 		static_cast<float>(this->resolution[0]) / static_cast<float>(this->resolution[1]),
 		0.1f, 100.0f);
 	glLoadIdentity(); // Reset the projection matrix
 	glLoadMatrixf(this->projectionMatrix.data());
+}
+
+void WindowManager::keyHandler(const XEvent& event) {
+	if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_Escape)) {
+		this->running = false;
+	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_w)) {
+		ObjectData::getInstance().moveObject(BACKWARD);
+	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_s)) {
+		ObjectData::getInstance().moveObject(FORWARD);
+	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_a)) {
+		ObjectData::getInstance().moveObject(LEFT);
+	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_d)) {
+		ObjectData::getInstance().moveObject(RIGHT);
+	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_q)) {
+		ObjectData::getInstance().moveObject(UP);
+	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_e)) {
+		ObjectData::getInstance().moveObject(DOWN);
+	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_r)) {
+		ObjectData::getInstance().moveObject(CENTER);
+	}
 }
 
 void WindowManager::loop() {
@@ -82,15 +102,11 @@ void WindowManager::loop() {
 			XNextEvent(this->display, &event);
 			switch (event.type) {
 				case KeyPress:
-					if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_Escape)) {
-						this->running = false;
-						std::cout << "Escape key pressed. Exiting program." << std::endl;
-					}
+					this->keyHandler(event);
 					break;
 				case ClientMessage:
 					if (event.xclient.data.l[0] == this->wmDelete) {
 						this->running = false;
-						std::cout << "Window close requested." << std::endl;
 					}
 					break;
 				case Expose:
@@ -122,13 +138,12 @@ void WindowManager::render() {
 	this->viewMatrix = Mat4::lookAt(Vec3(0.0f, 0.0f, 5.0f), Vec3(0.0f, 0.0f, 0.0f),
 		Vec3(0.0f, 1.0f, 0.0f));
 	this->rotationAngle += 1.00f * FrameTimer::getInstance().getDeltaTime(); // Increment rotation angle based on delta time
-	this->modelMatrix = Mat4::rotateY(this->rotationAngle);
+	this->modelMatrix = Mat4::translate(ObjectData::getInstance().getPosition()) * Mat4::rotateY(this->rotationAngle);
 	glLoadIdentity();
 	glLoadMatrixf((this->viewMatrix * this->modelMatrix).data()); // Load the combined projection and view matrix
 	ObjectData::getInstance().draw();
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
 	
-	//TODO: handle model translation with keyboard input
 	//TODO: set texture on keyboard input
 	//TODO: OPTIONAL: handle mouse input for model scaling
 }
@@ -144,4 +159,7 @@ WindowManager::~WindowManager() {
 		XFreeColormap(this->display, DefaultColormap(this->display, this->screen)); // Free the colormap
 	}
 	glXDestroyContext(this->display, glXGetCurrentContext()); // Destroy the OpenGL context
-	
+	XDestroyWindow(this->display, this->window);
+	if (this->display)
+		XCloseDisplay(display);
+}
