@@ -54,7 +54,7 @@ Mat4 Mat4::identity() {
 	return Mat4(identity);
 }
 
-Mat4 Mat4::perpective(float fov, const float aspect, const float near, const float far) {
+Mat4 Mat4::perspective(float fov, const float aspect, const float near, const float far) {
 	fov *= M_PI / 180.0f; // Convert FOV from degrees to radians
 	const float f = 1.0f / tanf(fov / 2.0f);
 	const float nf = 1.0f / (far - near);
@@ -80,6 +80,15 @@ Mat4 Mat4::rotateY(float angle) {
 	return Mat4(rotationY);
 }
 
+Mat4 Mat4::translate(const Vec3 &t) {
+	const float translate[16] = {
+		1,		0,		0,		0,
+		0,		1,		0,		0,
+		0,		0,		1,		0,
+		t.x,	t.y,	t.z,	1
+		};
+	return Mat4(translate);
+}
 
 Mat4 Mat4::lookAt(const Vec3 &eye, const Vec3 &center, const Vec3 &up) {
 	const Vec3 f = Vec3::normalize(center - eye);
