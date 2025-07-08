@@ -6,6 +6,8 @@
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <string>
+#include <unordered_map>
+#include <functional>
 #include "ObjectData.hpp"
 #include "matrix.hpp"
 #include "FrameTimer.hpp"
@@ -32,10 +34,12 @@ private:
 	int screen = 0;
 	std::string name;
 	std::vector<int> resolution;
+	std::unordered_map<KeySym, std::function<void()>> keyActions;
 	void resolveName(const char *name);
 	void resolveResolution(const std::vector<int>& windowRes);
 	void updateProjectionMatrix();
-	void keyHandler(const XEvent& event);
+	void keyHandler(XEvent& event);
+	void initKeyActions();
 	void render();
 	WindowManager() = default; 
 	~WindowManager();

@@ -43,7 +43,7 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 		throw RuntimeException("Failed to get a visual from X screen");
 	}
 	const Window root = RootWindow(this->display, this->screen); // Get the root window of the screen
-	Colormap colormap = XCreateColormap(this->display, root, visual->visual, AllocNone); // Create a colormap for the visual
+	const Colormap colormap = XCreateColormap(this->display, root, visual->visual, AllocNone); // Create a colormap for the visual
 	XSetWindowAttributes attributes;
 	attributes.colormap = colormap;
 	attributes.event_mask = ExposureMask | KeyPressMask | StructureNotifyMask; // Set the event mask for the window
@@ -63,6 +63,7 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	this->wmDelete = wmDelete;
 	
 	glXMakeCurrent(this->display, this->window, context); // Make the context current
+	this->initKeyActions();
 }
 
 void WindowManager::updateProjectionMatrix() {
@@ -74,23 +75,23 @@ void WindowManager::updateProjectionMatrix() {
 	glLoadMatrixf(this->projectionMatrix.data());
 }
 
-void WindowManager::keyHandler(const XEvent& event) {
-	if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_Escape)) {
-		this->running = false;
-	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_w)) {
-		ObjectData::getInstance().moveObject(BACKWARD);
-	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_s)) {
-		ObjectData::getInstance().moveObject(FORWARD);
-	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_a)) {
-		ObjectData::getInstance().moveObject(LEFT);
-	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_d)) {
-		ObjectData::getInstance().moveObject(RIGHT);
-	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_q)) {
-		ObjectData::getInstance().moveObject(UP);
-	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_e)) {
-		ObjectData::getInstance().moveObject(DOWN);
-	} else if (event.xkey.keycode == XKeysymToKeycode(this->display, XK_r)) {
-		ObjectData::getInstance().moveObject(CENTER);
+void WindowManager::initKeyActions()
+{
+	keyActions = {{XK_Escape, [this]() { this->running = false; }},
+		{XK_w, []() { ObjectData::getInstance().moveObject(BACKWARD); }},
+		{XK_s, []() { ObjectData::getInstance().moveObject(FORWARD); }},
+		{XK_a, []() { ObjectData::getInstance().moveObject(LEFT); }},
+		{XK_d, []() { ObjectData::getInstance().moveObject(RIGHT); }},
+		{XK_q, []() { ObjectData::getInstance().moveObject(UP); }},
+		{XK_e, []() { ObjectData::getInstance().moveObject(DOWN); }},
+		{XK_r, []() { ObjectData::getInstance().moveObject(CENTER); }},
+	};
+}
+
+void WindowManager::keyHandler(XEvent& event) {
+	KeySym keysym = XLookupKeysym(&event.xkey, 0);;
+	if (const auto it = keyActions.find(keysym); it != keyActions.end()) {
+		it->second();
 	}
 }
 
@@ -145,7 +146,6 @@ void WindowManager::render() {
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
 	
 	//TODO: set texture on keyboard input
-	//TODO: OPTIONAL: handle mouse input for model scaling
 }
 
 WindowManager& WindowManager::getInstance() {
