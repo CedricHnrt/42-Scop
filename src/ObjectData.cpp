@@ -128,22 +128,22 @@ void ObjectData::moveObject(const int direction) {
 			this->position = Vec3(0.0f, 0.0f, 0.0f);
 			break;
 		case UP:
-			this->position.y += 0.1f;
+			this->position.y += 3.00f * FrameTimer::getInstance().getDeltaTime();
 			break;
 		case DOWN:
-			this->position.y -= 0.1f;
+			this->position.y -= 3.00f * FrameTimer::getInstance().getDeltaTime();
 			break;
 		case LEFT:
-			this->position.x -= 0.1f;
+			this->position.x -= 3.00f * FrameTimer::getInstance().getDeltaTime();
 			break;
 		case RIGHT:
-			this->position.x += 0.1f;
+			this->position.x += 3.00f * FrameTimer::getInstance().getDeltaTime();
 			break;
 		case FORWARD:
-			this->position.z += 0.1f;
+			this->position.z += 3.00f * FrameTimer::getInstance().getDeltaTime();
 			break;
 		case BACKWARD:
-			this->position.z -= 0.1f;
+			this->position.z -= 3.00f * FrameTimer::getInstance().getDeltaTime();
 			break;
 		default:
 			break;

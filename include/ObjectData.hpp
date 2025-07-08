@@ -5,10 +5,11 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <GL/gl.h>
 #include "exceptionTypes.hpp"
 #include "ansiCodes.hpp"
 #include "matrix.hpp"
-#include <GL/gl.h>
+#include "FrameTimer.hpp"
 
 enum Direction {
 	CENTER = 0,
