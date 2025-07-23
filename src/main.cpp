@@ -15,6 +15,7 @@ int main(const int argc, const char *argv[])
 		}
 		ObjectData::getInstance().load(argv[1]);
 		WindowManager::getInstance().createWindow();
+		ObjectData::getInstance().loadPPM(TEX_PATH);
 		WindowManager::getInstance().loop();
 	}
 	catch (const std::exception& e) {

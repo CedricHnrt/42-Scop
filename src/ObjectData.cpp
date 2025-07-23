@@ -101,4 +101,188 @@ void ObjectData::computeAttributes() {
 			attrib.texCoord = Vec2(u, v);
 			
 			this->attributes.push_back(attrib); 
-			this->indices.push_back(this->indices.size()); // Maintain 
+			this->indices.push_back(this->indices.size()); // Maintain a flat index for OpenGL
+		}
+	}
+}
+
+void ObjectData::computeUVBound()
+{
+	for (const Vec3& v : this->vertices) {
+		this->minX = std::min(this->minX, v.x);
+		this->maxX = std::max(this->maxX, v.x);
+		this->minZ = std::min(this->minZ, v.z);
+		this->maxZ = std::max(this->maxZ, v.z);
+		this->minY = std::min(this->minY, v.y);
+		this->maxY = std::max(this->maxY, v.y);
+	}
+}
+
+void ObjectData::load(const char* filepath) {
+	checkFilename(filepath);
+	this->filename = prepareFilename(filepath); // Extract filename from path
+	
+	std::cout << BOLD << "Loading " << this->filename << "..." << RESET << std::endl;
+	std::ifstream file(filepath);
+	if (!file.is_open())
+		throw UnableToOpenOBJException();
+	
+	std::string line;
+	while (std::getline(file, line)) {
+		this->lineIndex++;
+		if (line.empty() || line[0] == '#')
+			continue;
+		std::istringstream iss(line);
+		std::string type;
+		iss >> type;
+		if (type == "v") {	//Vertex coordinates
+			Vec3 vertex;
+			iss >> vertex.x >> vertex.y >> vertex.z;
+			this->vertices.push_back(vertex);
+		}
+		else if (type == "f") {	//Face indices
+			this->getFace(iss);
+		}
+	}
+	file.close();
+	glEnableClientState(GL_VERTEX_ARRAY); // Enable vertex array functionality
+	this->computeCenter();
+	this->computeUVBound();
+	this->computeAttributes();
+	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
+	this->printInfo();
+}
+
+void ObjectData::draw() const {
+	if (this->showTexture) {
+		glEnable(GL_TEXTURE_2D);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer(2, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].texCoord); // Set texture coordinate pointer
+	}
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+	
+	glVertexPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].position); // Set vertex pointer to the position attribute
+	glColorPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].color); // Set color pointer to the color attribute
+	
+	glDrawElements(GL_TRIANGLES, static_cast<int>(this->indices.size()), GL_UNSIGNED_INT, this->indices.data()); // Draw the elements using the flat indices
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
+	if (this->showTexture) {
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisable(GL_TEXTURE_2D);
+	}
+}
+
+void ObjectData::dataToOpenGL()
+{
+	glGenTextures(1, &this->textureID);
+	glBindTexture(GL_TEXTURE_2D, this->textureID);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, this->ppmData.width, this->ppmData.height, 0, GL_RGB, GL_UNSIGNED_BYTE, this->ppmData.data);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	std::cout << "Texture created: " << this->textureID << std::endl;
+
+}
+
+void ObjectData::loadPPM(const char* filepath) {
+	std::ifstream file(filepath, std::ios::binary);
+	if (!file.is_open()) {
+		throw UnableToOpenPPMException(filepath);
+	}
+	std::string format;
+	file >> format;
+	if (format != "P6") {
+		throw WrongPPMFormatException(filepath);
+	}
+	skipCommentsAndWS(file); // Skip comments and whitespace after the format
+	int width, height;
+	file >> width >> height;
+	if (width <= 0 || height <= 0) {
+		throw WrongPPMFormatException(filepath);
+	}
+	skipCommentsAndWS(file); // Skip comments and whitespace after dimensions
+	int maxColorValue;
+	file >> maxColorValue;
+	if (maxColorValue != 255) {
+		throw WrongPPMFormatException(filepath);
+	}
+	this->ppmData.data = new unsigned char[width * height * 3]; // Allocate memory for pixel data
+	skipCommentsAndWS(file); // Skip any remaining whitespace before reading pixel data
+	file.read(reinterpret_cast<char*>(this->ppmData.data), width * height * 3);
+	if (!file) {
+		delete[] this->ppmData.data;
+		throw WrongPPMFormatException(filepath);
+	}
+	for (int i = 0; i < width * height * 3; i += 3) {
+		std::swap(this->ppmData.data[i + 1], this->ppmData.data[i + 2]); // swap G et B
+	}
+	this->ppmData.width = width;
+	this->ppmData.height = height;
+	this->dataToOpenGL();
+	std::cout << GREEN << BOLD << "PPM texture loaded successfully from " << filepath << RESET << std::endl;
+	file.close();
+}
+
+void ObjectData::moveObject(const int direction, const float speed) {
+	switch (direction) {
+		case CENTER:
+			this->position = Vec3(0.0f, 0.0f, 0.0f);
+			break;
+		case UP:
+			this->position.y += speed * FrameTimer::getInstance().getDeltaTime();
+			break;
+		case DOWN:
+			this->position.y -= speed * FrameTimer::getInstance().getDeltaTime();
+			break;
+		case LEFT:
+			this->position.x -= speed * FrameTimer::getInstance().getDeltaTime();
+			break;
+		case RIGHT:
+			this->position.x += speed * FrameTimer::getInstance().getDeltaTime();
+			break;
+		case FORWARD:
+			this->position.z += speed * FrameTimer::getInstance().getDeltaTime();
+			break;
+		case BACKWARD:
+			this->position.z -= speed * FrameTimer::getInstance().getDeltaTime();
+			break;
+		default:
+			break;
+	}
+}
+
+void ObjectData::toggleTexture() {
+	this->showTexture = !this->showTexture;
+}
+
+void ObjectData::printInfo() const {
+	std::cout << std::endl;
+	std::cout << "Object file: " << this->filename << std::endl;
+	std::cout << "Vertices: " << this->vertices.size() << std::endl;
+	std::cout << "Faces: " << this->faces.size() / 3 << std::endl;
+	std::cout << std::endl;
+}
+
+const std::string& ObjectData::getFilename() const {
+	return this->filename;
+}
+
+const Vec3& ObjectData::getPosition() const {
+	return this->position;
+}
+
+ObjectData& ObjectData::getInstance() {
+	static ObjectData instance;
+	return instance;
+}
+
+ObjectData::~ObjectData() {
+	if (this->ppmData.data) {
+		delete[] this->ppmData.data;
+		this->ppmData.data = nullptr;
+	}
+}

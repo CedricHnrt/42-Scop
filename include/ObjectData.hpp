@@ -71,4 +71,7 @@ class ObjectData {
 		void computeCenter();
 		void computeAttributes();
 		void computeUVBound();
-		void dataToOp
+		void dataToOpenGL();
+};
+
+#endif //OBJECTDATA_HPP
