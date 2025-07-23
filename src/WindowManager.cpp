@@ -85,6 +85,7 @@ void WindowManager::initKeyActions()
 		{XK_q, []() { ObjectData::getInstance().moveObject(UP); }},
 		{XK_e, []() { ObjectData::getInstance().moveObject(DOWN); }},
 		{XK_r, []() { ObjectData::getInstance().moveObject(CENTER); }},
+		{XK_space, []() { ObjectData::getInstance().toggleTexture(); }},
 	};
 }
 
@@ -159,7 +160,8 @@ WindowManager::~WindowManager() {
 		XFreeColormap(this->display, DefaultColormap(this->display, this->screen)); // Free the colormap
 	}
 	glXDestroyContext(this->display, glXGetCurrentContext()); // Destroy the OpenGL context
-	XDestroyWindow(this->display, this->window);
+	if (this->window)
+		XDestroyWindow(this->display, this->window);
 	if (this->display)
 		XCloseDisplay(display);
 }
