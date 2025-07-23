@@ -5,9 +5,9 @@
 
 class Vec2 {
 	public:
-		float x, y;
-		Vec2() : x(0.0f), y(0.0f) {}
-		Vec2(const float x, const float y) : x(x), y(y) {}
+		float u, v;
+		Vec2() : u(0.0f), v(0.0f) {}
+		Vec2(const float u, const float v) : u(u), v(v) {}
 };
 
 class Vec3 {
