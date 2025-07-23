@@ -12,6 +12,21 @@ static std::string prepareFilename(const std::string& filepath) {
 	return filepath.substr(filepath.find_last_of("\\/") + 1);
 }
 
+static void skipCommentsAndWS(std::ifstream& file)
+{
+	while (true) {
+		const char c = static_cast<char>(file.peek());
+		if (c == '#') {
+			file.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // Skip comments
+		} else if (!std::isspace(c)) {
+			file.get(); // Skip whitespace
+		}
+		else {
+			break;
+		}
+	}
+}
+
 void ObjectData::getFace(std::istringstream& iss) {
 	std::vector<unsigned int> face;
 	std::string part;
@@ -63,111 +78,27 @@ void ObjectData::computeCenter() {
 
 void ObjectData::computeAttributes() {
 	for (unsigned int i = 0; i < this->faces.size(); i += 3) { 
-		const float shade = (i / 3 % 10) / 10.0f; 
+		const float shade = (i / 3 % 10) / 10.0f;
+		const float angle = -M_PI / 2.0f;
 		for (int j = 0; j < 3; ++j) {
 			const unsigned int index = this->faces[i + j]; 
 			const Vec3 vertex = this->vertices[index]; 
 			VertexAttrib attrib; 
 			attrib.position = vertex; 
 			attrib.color = Vec3(shade, shade, shade);
+
+			const float scale = std::max(this->maxY - this->minY, this->maxZ - this->minZ);
+			float u = (vertex.y - this->minY) / (this->maxY - this->minY) * scale;
+			float v = (vertex.z - this->minZ) / (this->maxZ - this->minZ) * scale;
+
+			float uCentered = u - 0.5f;
+			float vCentered = v - 0.5f;
+			float uRotated = uCentered * std::cos(angle) - vCentered * std::sin(angle);
+			float vRotated = uCentered * std::sin(angle) + vCentered * std::cos(angle);
+			u = uRotated + 0.5f;
+			v = vRotated + 0.5f;
+			
+			attrib.texCoord = Vec2(u, v);
+			
 			this->attributes.push_back(attrib); 
-			this->indices.push_back(this->indices.size()); // Maintain a flat index for OpenGL
-		}
-	}
-}
-
-void ObjectData::load(const char* filepath) {
-	checkFilename(filepath);
-	this->filename = prepareFilename(filepath); // Extract filename from path
-	
-	std::cout << BOLD << "Loading " << this->filename << "..." << RESET << std::endl;
-	std::ifstream file(filepath);
-	if (!file.is_open())
-		throw UnableToOpenFileException();
-	
-	std::string line;
-	while (std::getline(file, line)) {
-		this->lineIndex++;
-		if (line.empty() || line[0] == '#')
-			continue;
-		std::istringstream iss(line);
-		std::string type;
-		iss >> type;
-		if (type == "v") {	//Vertex coordinates
-			Vec3 vertex;
-			iss >> vertex.x >> vertex.y >> vertex.z;
-			this->vertices.push_back(vertex);
-		}
-		else if (type == "f") {	//Face indices
-			this->getFace(iss);
-		}
-	}
-	file.close();
-	glEnableClientState(GL_VERTEX_ARRAY); // Enable vertex array functionality
-	this->computeCenter();
-	this->computeAttributes();
-	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
-	this->printInfo();
-}
-
-void ObjectData::draw() const {
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-	
-	glVertexPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].position); // Set vertex pointer to the position attribute
-	glColorPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].color); // Set color pointer to the color attribute
-	
-	glDrawElements(GL_TRIANGLES, static_cast<int>(this->indices.size()), GL_UNSIGNED_INT, this->indices.data()); // Draw the elements using the flat indices
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void ObjectData::moveObject(const int direction) {
-	switch (direction) {
-		case CENTER:
-			this->position = Vec3(0.0f, 0.0f, 0.0f);
-			break;
-		case UP:
-			this->position.y += 3.00f * FrameTimer::getInstance().getDeltaTime();
-			break;
-		case DOWN:
-			this->position.y -= 3.00f * FrameTimer::getInstance().getDeltaTime();
-			break;
-		case LEFT:
-			this->position.x -= 3.00f * FrameTimer::getInstance().getDeltaTime();
-			break;
-		case RIGHT:
-			this->position.x += 3.00f * FrameTimer::getInstance().getDeltaTime();
-			break;
-		case FORWARD:
-			this->position.z += 3.00f * FrameTimer::getInstance().getDeltaTime();
-			break;
-		case BACKWARD:
-			this->position.z -= 3.00f * FrameTimer::getInstance().getDeltaTime();
-			break;
-		default:
-			break;
-	}
-}
-
-
-void ObjectData::printInfo() const {
-	std::cout << std::endl;
-	std::cout << "Object file: " << this->filename << std::endl;
-	std::cout << "Vertices: " << this->vertices.size() << std::endl;
-	std::cout << "Faces: " << this->faces.size() / 3 << std::endl;
-	std::cout << std::endl;
-}
-
-const std::string& ObjectData::getFilename() const {
-	return this->filename;
-}
-
-const Vec3& ObjectData::getPosition() const {
-	return this->position;
-}
-
-ObjectData& ObjectData::getInstance() {
-	static ObjectData instance;
-	return instance;
-}
+			this->indices.push_back(this->indices.size()); // Maintain 
