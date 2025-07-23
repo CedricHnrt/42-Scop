@@ -3,7 +3,7 @@
 
 #include <exception>
 #include <string>
-#include <utility>
+#include "ObjectData.hpp"
 
 enum errorType {
   	NO_ERROR,				    //0
@@ -11,8 +11,10 @@ enum errorType {
   	NO_ARG_ERROR,			    //2
 	TOO_MANY_ARG_ERROR,		    //3
   	WRONG_EXTENSION_ERROR,	    //4
-	UNABLE_TO_OPEN_FILE_ERROR,	//5
-	RUNTIME_ERROR				//6
+	UNABLE_TO_OPEN_OBJ_ERROR,	//5
+	UNABLE_TO_OPEN_PPM_ERROR,	//6
+	WRONG_PPM_ERROR,			//7
+	RUNTIME_ERROR				//8
 };
 
 extern errorType errorCode;
@@ -46,11 +48,26 @@ class WrongExtensionException final : public BaseException {
 		}
 };
 
-class UnableToOpenFileException final : public BaseException {
+class UnableToOpenOBJException final : public BaseException {
 	public: 
-	     UnableToOpenFileException() : BaseException("ERROR: Unable to open file") {
-	               errorCode = UNABLE_TO_OPEN_FILE_ERROR;
+	     UnableToOpenOBJException() : BaseException("ERROR: Unable to open OBJ file") {
+	               errorCode = UNABLE_TO_OPEN_OBJ_ERROR;
 	     }
+};
+
+class UnableToOpenPPMException final : public BaseException {
+	public:
+		explicit UnableToOpenPPMException(const std::string &file) : BaseException(std::string("ERROR: Unable to open \"") + file + "\"") {
+			errorCode = UNABLE_TO_OPEN_PPM_ERROR;
+		}
+};
+
+class WrongPPMFormatException final : public BaseException
+{
+	public:
+		explicit WrongPPMFormatException(const std::string &file) : BaseException("ERROR: Wrong PPM format in file \"" + file + "\"") {
+			errorCode = UNABLE_TO_OPEN_PPM_ERROR;
+		}
 };
 
 class RuntimeException final : public BaseException {
