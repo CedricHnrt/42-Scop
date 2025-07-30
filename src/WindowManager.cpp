@@ -145,8 +145,6 @@ void WindowManager::render() {
 	glLoadMatrixf((this->viewMatrix * this->modelMatrix).data()); // Load the combined projection and view matrix
 	ObjectData::getInstance().draw();
 	glXSwapBuffers(this->display, this->window); // Swap buffers to display the rendered frame
-	
-	//TODO: set texture on keyboard input
 }
 
 WindowManager& WindowManager::getInstance() {
