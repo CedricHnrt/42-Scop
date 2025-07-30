@@ -79,7 +79,7 @@ void ObjectData::computeCenter() {
 void ObjectData::computeAttributes() {
 	for (unsigned int i = 0; i < this->faces.size(); i += 3) { 
 		const float shade = (i / 3 % 10) / 10.0f;
-		const float angle = -M_PI / 2.0f;
+		constexpr float angle = -M_PI / 2.0f;
 		for (int j = 0; j < 3; ++j) {
 			const unsigned int index = this->faces[i + j]; 
 			const Vec3 vertex = this->vertices[index]; 
@@ -153,24 +153,43 @@ void ObjectData::load(const char* filepath) {
 	this->printInfo();
 }
 
-void ObjectData::draw() const {
-	if (this->showTexture) {
-		glEnable(GL_TEXTURE_2D);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer(2, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].texCoord); // Set texture coordinate pointer
-	}
-	glEnableClientState(GL_VERTEX_ARRAY);
+void ObjectData::draw() {
+	if (this->showTexture && this->transitionFactor < 1.0f)
+		this->transitionFactor = std::min(1.0f, this->transitionFactor + FrameTimer::getInstance().getDeltaTime() * 0.5f);
+	else if (!this->showTexture && this->transitionFactor > 0.0f)
+		this->transitionFactor = std::max(0.0f, this->transitionFactor - FrameTimer::getInstance().getDeltaTime() * 0.5f);
+	glEnable(GL_TEXTURE_2D);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].texCoord);
+	
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	glEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].color);
+	glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_INTERPOLATE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE0_RGB, GL_TEXTURE);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE1_RGB, GL_PRIMARY_COLOR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_RGB, GL_SRC_COLOR);
+	glTexEnvi(GL_TEXTURE_ENV, GL_SOURCE2_RGB, GL_CONSTANT);
+	glTexEnvi(GL_TEXTURE_ENV, GL_OPERAND2_RGB, GL_SRC_ALPHA);
+	const GLfloat envColor[4] = {1.0f, 1.0f, 1.0f, this->transitionFactor};
+	glTexEnvfv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_COLOR, envColor);
 	
-	glVertexPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].position); // Set vertex pointer to the position attribute
-	glColorPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].color); // Set color pointer to the color attribute
-	
-	glDrawElements(GL_TRIANGLES, static_cast<int>(this->indices.size()), GL_UNSIGNED_INT, this->indices.data()); // Draw the elements using the flat indices
-	glDisableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].position);
+
+	glDrawElements(GL_TRIANGLES, static_cast<int>(this->indices.size()), GL_UNSIGNED_INT, this->indices.data());
+
 	glDisableClientState(GL_VERTEX_ARRAY);
 	if (this->showTexture) {
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_BLEND);
+	} else {
+		glDisableClientState(GL_COLOR_ARRAY);
 	}
 }
 

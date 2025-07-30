@@ -11,7 +11,7 @@
 #include "matrix.hpp"
 #include "FrameTimer.hpp"
 
-#define TEX_PATH "assets/textures/texture.ppm"
+	#define TEX_PATH "assets/textures/texture.ppm"
 
 enum Direction {
 	CENTER = 0,
@@ -44,7 +44,7 @@ class ObjectData {
 		void operator delete(void*) = delete;
 		void load(const char* filepath);
 		void loadPPM(const char *filepath);
-		void draw() const;
+		void draw();
 		void printInfo() const;
 		void moveObject(int direction, float speed = 3.0f);
 		void toggleTexture();
@@ -67,6 +67,7 @@ class ObjectData {
 		float minX = +INFINITY, minZ = +INFINITY, minY = +INFINITY;
 		float maxX = -INFINITY, maxZ = -INFINITY, maxY = -INFINITY;
 		bool showTexture = false;
+		float transitionFactor = 0.0f; // For texture transition
 		void getFace(std::istringstream& iss);
 		void computeCenter();
 		void computeAttributes();
