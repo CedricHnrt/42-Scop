@@ -12,7 +12,7 @@ NAME = scop
 CC = @c++
 INCLUDES =	-Iinclude/
 
-C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++17 -MMD -MP -g3
+C++FLAGS = -Wall -Wextra -Werror $(INCLUDES) -std=c++17 -MMD -MP
 RM = @rm -rf
 MKDIR = @mkdir -p
 PRINT = @echo
