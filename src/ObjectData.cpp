@@ -150,14 +150,15 @@ void ObjectData::load(const char* filepath) {
 	this->computeUVBound();
 	this->computeAttributes();
 	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
+	std::cout << std::endl;
 	this->printInfo();
 }
 
 void ObjectData::draw() {
 	if (this->showTexture && this->transitionFactor < 1.0f)
-		this->transitionFactor = std::min(1.0f, this->transitionFactor + FrameTimer::getInstance().getDeltaTime() * 0.5f);
+		this->transitionFactor = std::min(1.0f, this->transitionFactor + FrameTimer::getInstance().getDeltaTime() * 0.75f);
 	else if (!this->showTexture && this->transitionFactor > 0.0f)
-		this->transitionFactor = std::max(0.0f, this->transitionFactor - FrameTimer::getInstance().getDeltaTime() * 0.5f);
+		this->transitionFactor = std::max(0.0f, this->transitionFactor - FrameTimer::getInstance().getDeltaTime() * 0.75f);
 	glEnable(GL_TEXTURE_2D);
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glTexCoordPointer(2, GL_FLOAT, sizeof(VertexAttrib), &this->attributes[0].texCoord);
@@ -203,7 +204,6 @@ void ObjectData::dataToOpenGL()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	std::cout << "Texture created: " << this->textureID << std::endl;
 
 }
 
@@ -243,6 +243,7 @@ void ObjectData::loadPPM(const char* filepath) {
 	this->ppmData.height = height;
 	this->dataToOpenGL();
 	std::cout << GREEN << BOLD << "PPM texture loaded successfully from " << filepath << RESET << std::endl;
+	std::cout << std::endl;
 	file.close();
 }
 
@@ -279,7 +280,6 @@ void ObjectData::toggleTexture() {
 }
 
 void ObjectData::printInfo() const {
-	std::cout << std::endl;
 	std::cout << "Object file: " << this->filename << std::endl;
 	std::cout << "Vertices: " << this->vertices.size() << std::endl;
 	std::cout << "Faces: " << this->faces.size() / 3 << std::endl;

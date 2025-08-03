@@ -24,7 +24,6 @@ void WindowManager::resolveResolution(const std::vector<int>& windowRes) {
 		this->resolution = windowRes;
 	else
 		this->resolution = screenRes;
-	std::cout << "Resolution: " << this->resolution[0] << ", " << this->resolution[1] << std::endl; // REMOVE
 }
 
 void WindowManager::createWindow(const char *name, const std::vector<int>& windowRes) {
@@ -117,10 +116,14 @@ void WindowManager::loop() {
 					}
 					break;
 				case ConfigureNotify:
+				if (event.xconfigure.width != this->resolution[0] ||
+					event.xconfigure.height != this->resolution[1])
+				{
 					this->resolution[0] = event.xconfigure.width;
 					this->resolution[1] = event.xconfigure.height;
 					glViewport(0, 0, this->resolution[0], this->resolution[1]);
 					this->updateProjectionMatrix();
+				}
 					break;
 				default: break;
 			}
