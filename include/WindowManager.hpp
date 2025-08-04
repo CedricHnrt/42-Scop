@@ -37,6 +37,7 @@ private:
 	std::unordered_map<KeySym, std::function<void()>> keyActions;
 	void resolveName(const char *name);
 	void resolveResolution(const std::vector<int>& windowRes);
+	Vec3 computeEye();
 	void updateProjectionMatrix();
 	void keyHandler(XEvent& event);
 	void initKeyActions();

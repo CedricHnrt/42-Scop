@@ -10,6 +10,10 @@ static bool validateResolution(const std::vector<int>& windowRes, const std::vec
 	return true;
 }
 
+Vec3 WindowManager::computeEye() {
+	return ObjectData::getInstance().getCenter() + Vec3(0.0f, 0.0f, ObjectData::getInstance().getMaxDistance() * 1.0f);
+}
+
 void WindowManager::resolveName(const char *name) {
 	if (name)
 		this->name = name;
@@ -69,7 +73,7 @@ void WindowManager::updateProjectionMatrix() {
 	glMatrixMode(GL_PROJECTION);
 	this->projectionMatrix = Mat4::perspective(60.0f,
 		static_cast<float>(this->resolution[0]) / static_cast<float>(this->resolution[1]),
-		0.1f, 100.0f);
+		0.1f, 10000.0f); // Set the perspective projection matrix
 	glLoadIdentity(); // Reset the projection matrix
 	glLoadMatrixf(this->projectionMatrix.data());
 }
@@ -140,7 +144,7 @@ void WindowManager::render() {
 	glClearColor(0.6f, 0.6f, 0.6f, 1.0f);
 
 	glMatrixMode(GL_MODELVIEW);
-	this->viewMatrix = Mat4::lookAt(Vec3(0.0f, 0.0f, 5.0f), Vec3(0.0f, 0.0f, 0.0f),
+	this->viewMatrix = Mat4::lookAt(this->computeEye(), Vec3(0.0f, 0.0f, 0.0f),
 		Vec3(0.0f, 1.0f, 0.0f));
 	this->rotationAngle += 1.00f * FrameTimer::getInstance().getDeltaTime(); // Increment rotation angle based on delta time
 	this->modelMatrix = Mat4::translate(ObjectData::getInstance().getPosition()) * Mat4::rotateY(this->rotationAngle);

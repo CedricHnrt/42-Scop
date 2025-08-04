@@ -118,6 +118,15 @@ void ObjectData::computeUVBound()
 	}
 }
 
+void ObjectData::computeMaxDistance(){
+	this->maxDistance = 0.0f;
+	for (const auto& vertex : this->vertices) {
+		float distance = (vertex - this->center).length();
+		this->maxDistance = std::max(distance, this->maxDistance);
+	}
+}
+
+
 void ObjectData::load(const char* filepath) {
 	checkFilename(filepath);
 	this->filename = prepareFilename(filepath); // Extract filename from path
@@ -149,6 +158,7 @@ void ObjectData::load(const char* filepath) {
 	this->computeCenter();
 	this->computeUVBound();
 	this->computeAttributes();
+	this->computeMaxDistance();
 	std::cout << GREEN << BOLD << this->filename << " loaded succesfully." << RESET << std::endl;
 	std::cout << std::endl;
 	this->printInfo();
@@ -292,6 +302,14 @@ const std::string& ObjectData::getFilename() const {
 
 const Vec3& ObjectData::getPosition() const {
 	return this->position;
+}
+
+const Vec3& ObjectData::getCenter() const {
+	return this->center;
+}
+
+float ObjectData::getMaxDistance() const {
+	return this->maxDistance;
 }
 
 ObjectData& ObjectData::getInstance() {

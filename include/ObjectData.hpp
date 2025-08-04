@@ -50,6 +50,8 @@ class ObjectData {
 		void toggleTexture();
 		[[nodiscard]] const std::string& getFilename() const;
 		[[nodiscard]] const Vec3& getPosition() const;
+		[[nodiscard]] const Vec3& getCenter() const;
+		[[nodiscard]] float getMaxDistance() const;
     
    	private:
 		ObjectData() = default;
@@ -66,12 +68,14 @@ class ObjectData {
 		GLuint textureID = 0;
 		float minX = +INFINITY, minZ = +INFINITY, minY = +INFINITY;
 		float maxX = -INFINITY, maxZ = -INFINITY, maxY = -INFINITY;
-		bool showTexture = false;
 		float transitionFactor = 0.0f; // For texture transition
+		float maxDistance = 0.0f; // Max distance from the center
+		bool showTexture = false;
 		void getFace(std::istringstream& iss);
 		void computeCenter();
 		void computeAttributes();
 		void computeUVBound();
+		void computeMaxDistance();
 		void dataToOpenGL();
 };
 
