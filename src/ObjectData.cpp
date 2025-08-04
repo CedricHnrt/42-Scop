@@ -258,6 +258,7 @@ void ObjectData::loadPPM(const char* filepath) {
 }
 
 void ObjectData::moveObject(const int direction, const float speed) {
+	//TODO: speed should be variable depending on the distance to the object
 	switch (direction) {
 		case CENTER:
 			this->position = Vec3(0.0f, 0.0f, 0.0f);
