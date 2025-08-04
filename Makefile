@@ -38,7 +38,7 @@ obj/%.o: src/%.cpp Makefile
 	$(PRINT) "Compiling ${_BOLD}$<$(_END)..."
 	$(CC) -c $(C++FLAGS) $< -o $@
 
-all: bin/$(NAME)
+all: $(BIN_DIR)$(NAME)
 
 clean:
 ifneq ($(strip $(wildcard $(OBJ))),)
