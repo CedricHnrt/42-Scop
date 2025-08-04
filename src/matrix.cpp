@@ -20,12 +20,20 @@ float Vec3::dot(const Vec3 &a, const Vec3 &b) {
 	return (a.x * b.x + a.y * b.y + a.z * b.z);
 }
 
+float Vec3::length() const {
+	return sqrtf(this->x * this->x + this->y * this->y + this->z * this->z);
+}
+
 Vec3 Vec3::operator+(const Vec3& rhs) const {
 	return {this->x + rhs.x, this->y + rhs.y, this->z + rhs.z};
 }
 
 Vec3 Vec3::operator-(const Vec3& rhs) const {
 	return {this->x - rhs.x, this->y - rhs.y, this->z - rhs.z};
+}
+
+Vec3 Vec3::operator*(const float rhs) const {
+	return {this->x * rhs, this->y * rhs, this->z * rhs};
 }
 
 Vec3& Vec3::operator+=(const Vec3& rhs) {

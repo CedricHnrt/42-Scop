@@ -17,11 +17,13 @@ class Vec3 {
 		Vec3(const float x, const float y, const float z) : x(x), y(y), z(z) {}
 		Vec3 operator+(const Vec3& rhs) const;
 		Vec3 operator-(const Vec3& rhs) const;
+		Vec3 operator*(float rhs) const;
 		Vec3& operator+=(const Vec3& rhs);
 		Vec3& operator/=(float rhs);
 		[[nodiscard]] static Vec3 cross(const Vec3& a, const Vec3& b);
 		static Vec3 normalize(const Vec3& v);
 		static float dot(const Vec3& a, const Vec3& b);
+		[[nodiscard]] float length() const;
 };
 
 class Mat4 {
