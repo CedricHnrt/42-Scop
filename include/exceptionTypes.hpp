@@ -3,7 +3,6 @@
 
 #include <exception>
 #include <string>
-#include "ObjectData.hpp"
 
 enum errorType {
   	NO_ERROR,				    //0
@@ -24,7 +23,7 @@ class BaseException : public std::exception {
    		std::string message;
 	public:
      		explicit BaseException(std::string message) : message(std::move(message)) {}
-     		const char* what() const noexcept override { return message.c_str(); }
+     		[[nodiscard]] const char* what() const noexcept override { return message.c_str(); }
 };
 
 class NoArgException final : public BaseException {
