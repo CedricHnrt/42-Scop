@@ -1,5 +1,4 @@
 #include "matrix.hpp"
-#include "../include/matrix.hpp" // REMOVE
 
 Vec3 Vec3::cross(const Vec3 &a, const Vec3 &b) {
 	return {
@@ -10,7 +9,7 @@ Vec3 Vec3::cross(const Vec3 &a, const Vec3 &b) {
 }
 
 Vec3 Vec3::normalize(const Vec3 &v) {
-	float length = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
+	const float length = sqrtf(v.x * v.x + v.y * v.y + v.z * v.z);
 	if (length == 0.0f) {
 		return {0, 0, 0}; // Avoid division by zero
 	}
@@ -37,6 +36,9 @@ Vec3& Vec3::operator+=(const Vec3& rhs) {
 }
 
 Vec3 &Vec3::operator/=(const float rhs) {
+	if (rhs == 0.0f) {
+		return *this;	// Avoid division by zero
+	}
 	this->x /= rhs;
 	this->y /= rhs;
 	this->z /= rhs;
@@ -68,7 +70,7 @@ Mat4 Mat4::perspective(float fov, const float aspect, const float near, const fl
 	return Mat4(perspective);
 }
 
-Mat4 Mat4::rotateY(float angle) {
+Mat4 Mat4::rotateY(const float angle) {
 	const float c = cosf(angle);
 	const float s = sinf(angle);
 
