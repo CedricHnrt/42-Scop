@@ -11,7 +11,7 @@
 #include "matrix.hpp"
 #include "FrameTimer.hpp"
 
-	#define TEX_PATH "assets/textures/texture.ppm"
+#define TEX_PATH "assets/textures/texture.ppm"
 
 enum Direction {
 	CENTER = 0,
@@ -62,7 +62,7 @@ class ObjectData {
 		Vec3 position{0.0f, 0.0f, 0.0f};
 		Vec3 center{0.0f, 0.0f, 0.0f}; // Center of the object
 		size_t lineIndex = 0; // For error reporting
-		PPMData ppmData;
+		PPMData ppmData{};
 		GLuint textureID = 0;
 		float minX = +INFINITY, minZ = +INFINITY, minY = +INFINITY;
 		float maxX = -INFINITY, maxZ = -INFINITY, maxY = -INFINITY;
