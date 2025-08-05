@@ -11,7 +11,7 @@ static bool validateResolution(const std::vector<int>& windowRes, const std::vec
 }
 
 Vec3 WindowManager::computeEye() {
-	return ObjectData::getInstance().getCenter() + Vec3(0.0f, 0.0f, ObjectData::getInstance().getMaxDistance() * 1.0f);
+	return ObjectData::getInstance().getCenter() + Vec3(0.0f, 0.0f, ObjectData::getInstance().getMaxDistance() * 1.5f);
 }
 
 void WindowManager::resolveName(const char *name) {

@@ -46,7 +46,7 @@ class ObjectData {
 		void loadPPM(const char *filepath);
 		void draw();
 		void printInfo() const;
-		void moveObject(int direction, float speed = 3.0f);
+		void moveObject(int direction, float speed = 1.5f);
 		void toggleTexture();
 		[[nodiscard]] const std::string& getFilename() const;
 		[[nodiscard]] const Vec3& getPosition() const;
