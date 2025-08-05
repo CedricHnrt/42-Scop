@@ -37,15 +37,6 @@ ControlManager::ControlManager()
     this->keyLayout[EXIT] = "EXIT_PROGRAM";
 }
 
-static void clearTerminalLines(const int n)
-{
-    for (int i = 0; i < n; ++i) {
-        std::cout << "\33[2K\r"; // Clear the current line
-        if (i < n - 1)
-            std::cout << "\033[A"; // Move the cursor up one line
-    }
-}
-
 Control ControlManager::findControl(const KeySym keysym)
 {
     for (const auto& [control, key] : this->controls) {
@@ -138,12 +129,14 @@ void ControlManager::switchKeyLayout() {
 }
 
 void ControlManager::printInfo() const {
-    clearTerminalLines(1);
+    clearTerminalLines();
     std::cout << "Current key layout: " << this->currentKeyLayout << std::endl;
     std::cout << "Controls:" << std::endl;
     for (const auto& [control, key] : this->controls) {
-        std::cout << "  " << BLUE << this->keyLayout.at(control) << ": " << RESET
-            << BOLD << XKeysymToString(key) << RESET << std::endl;
+        if (control != NOT_FOUND) {
+            std::cout << "  " << BLUE << this->keyLayout.at(control) << ": " << RESET
+                << BOLD << XKeysymToString(key) << RESET << std::endl;
+        }
     }
     std::cout << std::endl;
 }
