@@ -20,11 +20,15 @@ public:
 	void* operator new(size_t) = delete;
 	void operator delete(void*) = delete;
 	void createWindow(const char *name = nullptr, const std::vector<int>& windowRes = std::vector<int>());
+	void exitProgram();
 	void loop();
 
 private:
 	Display* display = nullptr;
 	Window window{};
+	GLXContext context = nullptr;
+	XVisualInfo *visualInfo = nullptr;
+	Colormap colormap{};
 	Mat4 projectionMatrix = Mat4::identity();
 	Mat4 viewMatrix = Mat4::identity();
 	Mat4 modelMatrix = Mat4::identity();
@@ -39,8 +43,6 @@ private:
 	void resolveResolution(const std::vector<int>& windowRes);
 	Vec3 computeEye();
 	void updateProjectionMatrix();
-	void keyHandler(XEvent& event);
-	void initKeyActions();
 	void render();
 	WindowManager() = default; 
 	~WindowManager();

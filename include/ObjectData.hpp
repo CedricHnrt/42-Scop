@@ -10,18 +10,9 @@
 #include "ansiCodes.hpp"
 #include "matrix.hpp"
 #include "FrameTimer.hpp"
+#include "ControlManager.hpp"
 
 #define TEX_PATH "assets/textures/texture.ppm"
-
-enum Direction {
-	CENTER = 0,
-	UP = 1,
-	DOWN = -1,
-	LEFT = 2,
-	RIGHT = -2,
-	FORWARD = 3,
-	BACKWARD = -3
-};
 
 struct VertexAttrib {
 	Vec3 position;
@@ -46,7 +37,7 @@ class ObjectData {
 		void loadPPM(const char *filepath);
 		void draw();
 		void printInfo() const;
-		void moveObject(int direction, float speed = 1.5f);
+		void moveObject(int control, float speed = 1.5f);
 		void toggleTexture();
 		[[nodiscard]] const std::string& getFilename() const;
 		[[nodiscard]] const Vec3& getPosition() const;

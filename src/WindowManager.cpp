@@ -17,7 +17,8 @@ Vec3 WindowManager::computeEye() {
 void WindowManager::resolveName(const char *name) {
 	if (name)
 		this->name = name;
-	this->name = "SCOP - " + ObjectData::getInstance().getFilename();
+	else
+		this->name = "SCOP - " + ObjectData::getInstance().getFilename();
 }
 
 void WindowManager::resolveResolution(const std::vector<int>& windowRes) {
@@ -41,22 +42,22 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	this->resolveResolution(windowRes); // Set Window Resolution
 	
 	int visualAttribs[] = {GLX_RGBA, GLX_DEPTH_SIZE, 24, GLX_DOUBLEBUFFER, None}; // Attributes for the visual
-	XVisualInfo* visual = glXChooseVisual(this->display, this->screen, visualAttribs); // Choose a visual that supports OpenGL
-	if (!visual) {
+	this->visualInfo = glXChooseVisual(this->display, this->screen, visualAttribs); // Choose a visual that supports OpenGL
+	if (!this->visualInfo) {
 		throw RuntimeException("Failed to get a visual from X screen");
 	}
 	const Window root = RootWindow(this->display, this->screen); // Get the root window of the screen
-	const Colormap colormap = XCreateColormap(this->display, root, visual->visual, AllocNone); // Create a colormap for the visual
+	this->colormap = XCreateColormap(this->display, root, this->visualInfo->visual, AllocNone); // Create a colormap for the visual
 	XSetWindowAttributes attributes;
-	attributes.colormap = colormap;
-	attributes.event_mask = ExposureMask | KeyPressMask | StructureNotifyMask; // Set the event mask for the window
+	attributes.colormap = this->colormap;
+	attributes.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask; // Set the event mask for the window
 	
 	this->window = XCreateWindow(this->display, root, 0, 0, this->resolution[0], this->resolution[1], 0,
-			visual->depth, InputOutput, visual->visual, CWColormap | CWEventMask, &attributes); // Create the window
+			this->visualInfo->depth, InputOutput, this->visualInfo->visual, CWColormap | CWEventMask, &attributes); // Create the window
 
 	XStoreName(this->display, this->window, this->name.c_str()); // Set the window name
 	XMapWindow(this->display, this->window); // Map the window to the screen
-	GLXContext context = glXCreateContext(this->display, visual, nullptr, GL_TRUE);
+	this->context = glXCreateContext(this->display, this->visualInfo, nullptr, GL_TRUE);
 	if (!context) {
 		throw RuntimeException("Failed to create OpenGL context");
 	}
@@ -66,37 +67,15 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	this->wmDelete = wmDelete;
 	
 	glXMakeCurrent(this->display, this->window, context); // Make the context current
-	this->initKeyActions();
 }
 
 void WindowManager::updateProjectionMatrix() {
 	glMatrixMode(GL_PROJECTION);
 	this->projectionMatrix = Mat4::perspective(60.0f,
 		static_cast<float>(this->resolution[0]) / static_cast<float>(this->resolution[1]),
-		0.1f, 10000.0f); // Set the perspective projection matrix
+		0.1f, 100000.0f); // Set the perspective projection matrix
 	glLoadIdentity(); // Reset the projection matrix
 	glLoadMatrixf(this->projectionMatrix.data());
-}
-
-void WindowManager::initKeyActions()
-{
-	keyActions = {{XK_Escape, [this]() { this->running = false; }},
-		{XK_w, []() { ObjectData::getInstance().moveObject(BACKWARD); }},
-		{XK_s, []() { ObjectData::getInstance().moveObject(FORWARD); }},
-		{XK_a, []() { ObjectData::getInstance().moveObject(LEFT); }},
-		{XK_d, []() { ObjectData::getInstance().moveObject(RIGHT); }},
-		{XK_q, []() { ObjectData::getInstance().moveObject(UP); }},
-		{XK_e, []() { ObjectData::getInstance().moveObject(DOWN); }},
-		{XK_r, []() { ObjectData::getInstance().moveObject(CENTER); }},
-		{XK_space, []() { ObjectData::getInstance().toggleTexture(); }},
-	};
-}
-
-void WindowManager::keyHandler(XEvent& event) {
-	KeySym keysym = XLookupKeysym(&event.xkey, 0);;
-	if (const auto it = keyActions.find(keysym); it != keyActions.end()) {
-		it->second();
-	}
 }
 
 void WindowManager::loop() {
@@ -106,8 +85,19 @@ void WindowManager::loop() {
 		while (XPending(this->display)) {
 			XNextEvent(this->display, &event);
 			switch (event.type) {
-				case KeyPress:
-					this->keyHandler(event);
+			case KeyPress:
+					ControlManager::getInstance().handleKeyPress(XLookupKeysym(&event.xkey, 0));
+					break;
+			case KeyRelease:
+					if (XEventsQueued(this->display, QueuedAfterReading)) {
+						XEvent nextEvent;
+						XPeekEvent(this->display, &nextEvent);
+						if (nextEvent.type == KeyPress && nextEvent.xkey.keycode == event.xkey.keycode) {
+							// Ignore key release if a key press follows immediately
+							break;
+						}
+					}
+					ControlManager::getInstance().handleKeyRelease(XLookupKeysym(&event.xkey, 0));
 					break;
 				case ClientMessage:
 					if (event.xclient.data.l[0] == this->wmDelete) {
@@ -132,8 +122,13 @@ void WindowManager::loop() {
 				default: break;
 			}
 		}
+		ControlManager::getInstance().checkActiveControls();
 		this->render();
 	}
+}
+
+void WindowManager::exitProgram() {
+	this->running = false;
 }
 
 void WindowManager::render() {
@@ -162,9 +157,11 @@ WindowManager& WindowManager::getInstance() {
 WindowManager::~WindowManager() {
 	glXMakeCurrent(this->display, None, nullptr);
 	if (this->display && this->screen >= 0) {
-		XFreeColormap(this->display, DefaultColormap(this->display, this->screen)); // Free the colormap
+		XFreeColormap(this->display, this->colormap);
 	}
-	glXDestroyContext(this->display, glXGetCurrentContext()); // Destroy the OpenGL context
+	if (this->visualInfo)
+		XFree(this->visualInfo);
+	glXDestroyContext(this->display, this->context);
 	if (this->window)
 		XDestroyWindow(this->display, this->window);
 	if (this->display)

@@ -257,10 +257,10 @@ void ObjectData::loadPPM(const char* filepath) {
 	file.close();
 }
 
-void ObjectData::moveObject(const int direction, const float speed) {
+void ObjectData::moveObject(const int control, const float speed) {
 	const float ajustedSpeed = (speed * this->maxDistance) * FrameTimer::getInstance().getDeltaTime();
-	switch (direction) {
-		case CENTER:
+	switch (control) {
+		case RESET_POSITION:
 			this->position = Vec3(0.0f, 0.0f, 0.0f);
 			break;
 		case UP:
@@ -276,10 +276,10 @@ void ObjectData::moveObject(const int direction, const float speed) {
 			this->position.x += ajustedSpeed;
 			break;
 		case FORWARD:
-			this->position.z += ajustedSpeed;
+			this->position.z -= ajustedSpeed;
 			break;
 		case BACKWARD:
-			this->position.z -= ajustedSpeed;
+			this->position.z += ajustedSpeed;
 			break;
 		default:
 			break;
