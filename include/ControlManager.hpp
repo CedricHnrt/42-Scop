@@ -9,6 +9,7 @@ enum Control {
     EXIT,
     RESET_POSITION,
     TOGGLE_TEXTURE,
+    TOGGLE_KEY_LAYOUT,
     LEFT,
     RIGHT,
     FORWARD,
@@ -28,15 +29,20 @@ class ControlManager {
         void handleKeyPress(KeySym);
         void handleKeyRelease(KeySym);
         void checkActiveControls();
+        void printInfo() const;
 
     private:
         std::unordered_map<Control, KeySym> controls;
         std::unordered_map<Control, bool> activeControls;
         std::unordered_map<Control, bool> justPressedControls;
+        std::string currentKeyLayout; // Default key layout
+
+        std::unordered_map<Control, std::string> keyLayout;
 
         [[nodiscard]] Control findControl(KeySym keysym);
         bool justPressed(Control control) const;
         void resetJustPressedControls();
+        void switchKeyLayout();
         ControlManager();
         ~ControlManager() = default;
 

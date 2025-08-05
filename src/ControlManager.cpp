@@ -15,14 +15,26 @@ ControlManager::ControlManager()
     this->controls[DOWN] = XK_e;
     this->controls[RESET_POSITION] = XK_r;
     this->controls[TOGGLE_TEXTURE] = XK_space;
+    this->controls[TOGGLE_KEY_LAYOUT] = XK_Tab;
     this->controls[EXIT] = XK_Escape;
 
-    for (auto& [control, active] : this->activeControls) {
-        active = false;
+    this->currentKeyLayout = "QWERTY"; // Default key layout
+
+    for (const auto& control : this->controls) {
+        this->activeControls[control.first] = false; // Initialize all controls as inactive
+        this->justPressedControls[control.first] = false; // Initialize all controls as not just pressed
     }
-    for (auto& [control, justPressed] : this->justPressedControls) {
-        justPressed = false;
-    }
+
+    this->keyLayout[LEFT] = "LEFT";
+    this->keyLayout[RIGHT] = "RIGHT";
+    this->keyLayout[FORWARD] = "FORWARD";
+    this->keyLayout[BACKWARD] = "BACKWARD";
+    this->keyLayout[UP] = "UP";
+    this->keyLayout[DOWN] = "DOWN";
+    this->keyLayout[RESET_POSITION] = "RESET_POSITION";
+    this->keyLayout[TOGGLE_TEXTURE] = "TOGGLE_TEXTURE";
+    this->keyLayout[TOGGLE_KEY_LAYOUT] = "TOGGLE_KEY_LAYOUT";
+    this->keyLayout[EXIT] = "EXIT_PROGRAM";
 }
 
 Control ControlManager::findControl(const KeySym keysym)
@@ -81,10 +93,45 @@ void ControlManager::checkActiveControls()
                     if (this->justPressed(TOGGLE_TEXTURE)) {
                         ObjectData::getInstance().toggleTexture();
                     } break;
+                case TOGGLE_KEY_LAYOUT:
+                    if (this->justPressed(TOGGLE_KEY_LAYOUT)) {
+                        this->switchKeyLayout();
+                    } break;
                 case EXIT: WindowManager::getInstance().exitProgram(); break;
             default: break;
             }
         }
     }
     this->resetJustPressedControls();
+}
+
+void ControlManager::switchKeyLayout() {
+    // Switch between QWERTY and AZERTY layouts
+    if (this->currentKeyLayout == "QWERTY") {
+        this->currentKeyLayout = "AZERTY";
+        this->controls[LEFT] = XK_q;
+        this->controls[RIGHT] = XK_d;
+        this->controls[FORWARD] = XK_z;
+        this->controls[BACKWARD] = XK_s;
+        this->controls[UP] = XK_a;
+        this->controls[DOWN] = XK_e;
+    } else if (this->currentKeyLayout == "AZERTY") {
+        this->currentKeyLayout = "QWERTY";
+        this->controls[LEFT] = XK_a;
+        this->controls[RIGHT] = XK_d;
+        this->controls[FORWARD] = XK_w;
+        this->controls[BACKWARD] = XK_s;
+        this->controls[UP] = XK_q;
+        this->controls[DOWN] = XK_e;
+    }
+    this->printInfo();
+}
+
+void ControlManager::printInfo() const {
+    std::cout << "\b\b\b\b\b\b\b\bCurrent key layout: " << this->currentKeyLayout << std::endl;
+    std::cout << "Controls:" << std::endl;
+    for (const auto& [control, key] : this->controls) {
+        std::cout << "  " << this->keyLayout.at(control) << ": " << XKeysymToString(key) << std::endl;
+    }
+    std::cout << std::endl;
 }
