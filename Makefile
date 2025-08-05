@@ -19,6 +19,7 @@ PRINT = @echo
 FILES =	main			\
 		ObjectData		\
 		WindowManager	\
+		ControlManager	\
 		matrix			\
 		FrameTimer
 OBJ_DIR = obj/
