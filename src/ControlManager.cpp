@@ -7,16 +7,16 @@ ControlManager& ControlManager::getInstance() {
 
 ControlManager::ControlManager()
 {
-    this->controls[LEFT] = XK_a;
-    this->controls[RIGHT] = XK_d;
-    this->controls[FORWARD] = XK_w;
-    this->controls[BACKWARD] = XK_s;
-    this->controls[UP] = XK_q;
-    this->controls[DOWN] = XK_e;
+    this->controls[EXIT] = XK_Escape;
+    this->controls[TOGGLE_KEY_LAYOUT] = XK_Tab;
     this->controls[RESET_POSITION] = XK_r;
     this->controls[TOGGLE_TEXTURE] = XK_space;
-    this->controls[TOGGLE_KEY_LAYOUT] = XK_Tab;
-    this->controls[EXIT] = XK_Escape;
+    this->controls[DOWN] = XK_e;
+    this->controls[UP] = XK_q;
+    this->controls[RIGHT] = XK_d;
+    this->controls[BACKWARD] = XK_s;
+    this->controls[LEFT] = XK_a;
+    this->controls[FORWARD] = XK_w;
 
     this->currentKeyLayout = "QWERTY"; // Default key layout
 
@@ -35,6 +35,15 @@ ControlManager::ControlManager()
     this->keyLayout[TOGGLE_TEXTURE] = "TOGGLE_TEXTURE";
     this->keyLayout[TOGGLE_KEY_LAYOUT] = "TOGGLE_KEY_LAYOUT";
     this->keyLayout[EXIT] = "EXIT_PROGRAM";
+}
+
+static void clearTerminalLines(const int n)
+{
+    for (int i = 0; i < n; ++i) {
+        std::cout << "\33[2K\r"; // Clear the current line
+        if (i < n - 1)
+            std::cout << "\033[A"; // Move the cursor up one line
+    }
 }
 
 Control ControlManager::findControl(const KeySym keysym)
@@ -124,14 +133,17 @@ void ControlManager::switchKeyLayout() {
         this->controls[UP] = XK_q;
         this->controls[DOWN] = XK_e;
     }
+    clearTerminalLines(14);
     this->printInfo();
 }
 
 void ControlManager::printInfo() const {
-    std::cout << "\b\b\b\b\b\b\b\bCurrent key layout: " << this->currentKeyLayout << std::endl;
+    clearTerminalLines(1);
+    std::cout << "Current key layout: " << this->currentKeyLayout << std::endl;
     std::cout << "Controls:" << std::endl;
     for (const auto& [control, key] : this->controls) {
-        std::cout << "  " << this->keyLayout.at(control) << ": " << XKeysymToString(key) << std::endl;
+        std::cout << "  " << BLUE << this->keyLayout.at(control) << ": " << RESET
+            << BOLD << XKeysymToString(key) << RESET << std::endl;
     }
     std::cout << std::endl;
 }

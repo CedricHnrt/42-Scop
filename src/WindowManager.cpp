@@ -81,6 +81,7 @@ void WindowManager::updateProjectionMatrix() {
 void WindowManager::loop() {
 	XEvent event;
 	this->running = true;
+	ControlManager::getInstance().printInfo();
 	while (this->running) {
 		while (XPending(this->display)) {
 			XNextEvent(this->display, &event);
