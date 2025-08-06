@@ -50,7 +50,7 @@ void WindowManager::createWindow(const char *name, const std::vector<int>& windo
 	this->colormap = XCreateColormap(this->display, root, this->visualInfo->visual, AllocNone); // Create a colormap for the visual
 	XSetWindowAttributes attributes;
 	attributes.colormap = this->colormap;
-	attributes.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask; // Set the event mask for the window
+	attributes.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | StructureNotifyMask | PointerMotionMask; // Set the event mask for the window
 	
 	this->window = XCreateWindow(this->display, root, 0, 0, this->resolution[0], this->resolution[1], 0,
 			this->visualInfo->depth, InputOutput, this->visualInfo->visual, CWColormap | CWEventMask, &attributes); // Create the window
@@ -86,10 +86,10 @@ void WindowManager::loop() {
 		while (XPending(this->display)) {
 			XNextEvent(this->display, &event);
 			switch (event.type) {
-			case KeyPress:
+				case KeyPress:
 					ControlManager::getInstance().handleKeyPress(XLookupKeysym(&event.xkey, 0));
 					break;
-			case KeyRelease:
+				case KeyRelease:
 					if (XEventsQueued(this->display, QueuedAfterReading)) {
 						XEvent nextEvent;
 						XPeekEvent(this->display, &nextEvent);
@@ -99,6 +99,11 @@ void WindowManager::loop() {
 						}
 					}
 					ControlManager::getInstance().handleKeyRelease(XLookupKeysym(&event.xkey, 0));
+					break;
+				case MotionNotify:
+					if (ControlManager::getInstance().getMouseData().enabled) {
+						ControlManager::getInstance().updateMouseData(event.xmotion.x, event.xmotion.y);
+					}
 					break;
 				case ClientMessage:
 					if (event.xclient.data.l[0] == this->wmDelete) {
@@ -123,7 +128,7 @@ void WindowManager::loop() {
 				default: break;
 			}
 		}
-		ControlManager::getInstance().checkActiveControls();
+		ControlManager::getInstance().processActiveControls();
 		this->render();
 	}
 }
@@ -142,8 +147,19 @@ void WindowManager::render() {
 	glMatrixMode(GL_MODELVIEW);
 	this->viewMatrix = Mat4::lookAt(this->computeEye(), Vec3(0.0f, 0.0f, 0.0f),
 		Vec3(0.0f, 1.0f, 0.0f));
-	this->rotationAngle += 1.00f * FrameTimer::getInstance().getDeltaTime(); // Increment rotation angle based on delta time
-	this->modelMatrix = Mat4::translate(ObjectData::getInstance().getPosition()) * Mat4::rotateY(this->rotationAngle);
+	if (ControlManager::getInstance().getMouseData().enabled) {
+		this->modelMatrix = Mat4::translate(ObjectData::getInstance().getPosition())
+			* Mat4::rotateX(ControlManager::getInstance().getRotationY())
+			* Mat4::rotateY(ControlManager::getInstance().getRotationX());
+	}
+	else
+	{
+		this->rotationAngle += 1.00f * FrameTimer::getInstance().getDeltaTime();
+		if (this->rotationAngle > 360.0f) {
+			this->rotationAngle -= 360.0f; // Reset the rotation angle to avoid overflow
+		}
+		this->modelMatrix = Mat4::translate(ObjectData::getInstance().getPosition()) * Mat4::rotateY(this->rotationAngle);
+	}
 	glLoadIdentity();
 	glLoadMatrixf((this->viewMatrix * this->modelMatrix).data()); // Load the combined projection and view matrix
 	ObjectData::getInstance().draw();

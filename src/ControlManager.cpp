@@ -11,6 +11,7 @@ ControlManager::ControlManager()
     this->controls[TOGGLE_KEY_LAYOUT] = XK_Tab;
     this->controls[RESET_POSITION] = XK_r;
     this->controls[TOGGLE_TEXTURE] = XK_space;
+    this->controls[TOGGLE_MOUSE] = XK_m;
     this->controls[DOWN] = XK_e;
     this->controls[UP] = XK_q;
     this->controls[RIGHT] = XK_d;
@@ -20,9 +21,9 @@ ControlManager::ControlManager()
 
     this->currentKeyLayout = "QWERTY"; // Default key layout
 
-    for (const auto& control : this->controls) {
-        this->activeControls[control.first] = false; // Initialize all controls as inactive
-        this->justPressedControls[control.first] = false; // Initialize all controls as not just pressed
+    for (const auto& [control, active] : this->controls) {
+        this->activeControls[control] = false; // Initialize all controls as inactive
+        this->justPressedControls[control] = false; // Initialize all controls as not just pressed
     }
 
     this->keyLayout[LEFT] = "LEFT";
@@ -32,6 +33,7 @@ ControlManager::ControlManager()
     this->keyLayout[UP] = "UP";
     this->keyLayout[DOWN] = "DOWN";
     this->keyLayout[RESET_POSITION] = "RESET_POSITION";
+    this->keyLayout[TOGGLE_MOUSE] = "TOGGLE_MOUSE";
     this->keyLayout[TOGGLE_TEXTURE] = "TOGGLE_TEXTURE";
     this->keyLayout[TOGGLE_KEY_LAYOUT] = "TOGGLE_KEY_LAYOUT";
     this->keyLayout[EXIT] = "EXIT_PROGRAM";
@@ -77,7 +79,23 @@ void ControlManager::resetJustPressedControls() {
     }
 }
 
-void ControlManager::checkActiveControls()
+void ControlManager::updateMouseData(const int mouseX, const int mouseY)
+{
+    this->mouse.lastX = this->mouse.currentX;
+    this->mouse.lastY = this->mouse.currentY;
+
+    this->mouse.currentX = mouseX;
+    this->mouse.currentY = mouseY;
+
+    this->mouse.deltaX = this->mouse.currentX - this->mouse.lastX;
+    this->mouse.deltaY = this->mouse.currentY - this->mouse.lastY;
+
+    this->mouse.rotationX += (this->mouse.deltaX * this->mouse.sensitivity) * FrameTimer::getInstance().getDeltaTime();
+    this->mouse.rotationY += (this->mouse.deltaY * this->mouse.sensitivity) * FrameTimer::getInstance().getDeltaTime();
+}
+
+
+void ControlManager::processActiveControls()
 {
     for (const auto& [control, active] : this->activeControls) {
         if (active) {
@@ -96,6 +114,15 @@ void ControlManager::checkActiveControls()
                 case TOGGLE_KEY_LAYOUT:
                     if (this->justPressed(TOGGLE_KEY_LAYOUT)) {
                         this->switchKeyLayout();
+                    } break;
+                case TOGGLE_MOUSE:
+                    if (this->justPressed(TOGGLE_MOUSE)) {
+                        this->mouse.enabled = !this->mouse.enabled;
+                        if (this->mouse.enabled) {
+                            std::cout << "Mouse controls enabled." << std::endl;
+                        } else {
+                            std::cout << "Mouse controls disabled." << std::endl;
+                        }
                     } break;
                 case EXIT: WindowManager::getInstance().exitProgram(); break;
             default: break;
@@ -126,6 +153,18 @@ void ControlManager::switchKeyLayout() {
     }
     clearTerminalLines(14);
     this->printInfo();
+}
+
+mouseData& ControlManager::getMouseData() {
+    return this->mouse;
+}
+
+float ControlManager::getRotationX() const {
+    return this->mouse.rotationX;
+}
+
+float ControlManager::getRotationY() const {
+    return this->mouse.rotationY;
 }
 
 void ControlManager::printInfo() const {

@@ -78,6 +78,18 @@ Mat4 Mat4::perspective(float fov, const float aspect, const float near, const fl
 	return Mat4(perspective);
 }
 
+Mat4 Mat4::rotateX(const float angle) {
+	const float c = cosf(angle);
+	const float s = sinf(angle);
+
+	const float rotationX[16] = {
+		1, 0, 0, 0,
+		0, c, -s, 0,
+		0, s, c, 0,
+		0, 0, 0, 1};
+	return Mat4(rotationX);
+}
+
 Mat4 Mat4::rotateY(const float angle) {
 	const float c = cosf(angle);
 	const float s = sinf(angle);
