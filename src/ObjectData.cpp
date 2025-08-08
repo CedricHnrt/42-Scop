@@ -38,14 +38,14 @@ void ObjectData::getFace(std::istringstream& iss) {
 			face.push_back(std::stoi(vIndexString) - 1); // OBJ indices are 1-based
 		}
 		catch (const std::invalid_argument& e) {
-			std::cerr << YELLOW << "WARNING: Invalid vertex index: " << vIndexString << RESET << std::endl;
-			std::cerr << "Line " << this->lineIndex << std::endl;
+			std::cout << YELLOW << "WARNING: Invalid vertex index: " << vIndexString << std::endl;
+			std::cout << "Line " << this->lineIndex << RESET << std::endl;
 			face.clear();
 			break;
 		}
 		catch (const std::out_of_range& e) {
-			std::cerr << YELLOW << "WARNING: Vertex index out of range: " << vIndexString << RESET << std::endl;
-			std::cerr << "Line " << this->lineIndex << std::endl;
+			std::cout << YELLOW << "WARNING: Vertex index out of range: " << vIndexString << std::endl;
+			std::cout << "Line " << this->lineIndex << RESET << std::endl;
 			face.clear();
 			break;
 		}
@@ -54,8 +54,8 @@ void ObjectData::getFace(std::istringstream& iss) {
 		this->faces.insert(this->faces.end(), face.begin(), face.end()); // Directly add triangle indices
 	}
 	else if (face.size() < 3) { // Ensure at least a triangle
-		std::cerr << YELLOW << "WARNING: Face with less than 3 vertices found, skipping." << RESET << std::endl;
-		std::cerr << "Line " << this->lineIndex << std::endl;
+		std::cout << YELLOW << "WARNING: Face with less than 3 vertices found, skipping." << std::endl;
+		std::cout << "Line " << this->lineIndex << RESET << std::endl;
 	}
 	else { // Handle polygons with more than 3 vertices
 		// Triangulate the polygon
@@ -77,14 +77,17 @@ void ObjectData::computeCenter() {
 }
 
 void ObjectData::computeAttributes() {
-	for (unsigned int i = 0; i < this->faces.size(); i += 3) { 
+	for (unsigned int i = 0; i < this->faces.size(); i += 3) {
 		const float shade = (i / 3 % 10) / 10.0f;
 		constexpr float angle = -M_PI / 2.0f;
 		for (int j = 0; j < 3; ++j) {
-			const unsigned int index = this->faces[i + j]; 
-			const Vec3 vertex = this->vertices[index]; 
-			VertexAttrib attrib; 
-			attrib.position = vertex; 
+			const unsigned int index = this->faces[i + j];
+			if (index >= this->vertices.size()) {
+                throw RuntimeException("ERROR: Vertex index out of range in face definition.");
+            }
+			const Vec3 vertex = this->vertices[index];
+			VertexAttrib attrib;
+			attrib.position = vertex;
 			attrib.color = Vec3(shade, shade, shade);
 
 			const float scale = std::max(this->maxY - this->minY, this->maxZ - this->minZ);
@@ -97,10 +100,10 @@ void ObjectData::computeAttributes() {
 			float vRotated = uCentered * std::sin(angle) + vCentered * std::cos(angle);
 			u = uRotated + 0.5f;
 			v = vRotated + 0.5f;
-			
+
 			attrib.texCoord = Vec2(u, v);
-			
-			this->attributes.push_back(attrib); 
+
+			this->attributes.push_back(attrib);
 			this->indices.push_back(this->indices.size()); // Maintain a flat index for OpenGL
 		}
 	}
@@ -130,12 +133,12 @@ void ObjectData::computeMaxDistance(){
 void ObjectData::load(const char* filepath) {
 	checkFilename(filepath);
 	this->filename = prepareFilename(filepath); // Extract filename from path
-	
+
 	std::cout << BOLD << "Loading " << this->filename << "..." << RESET << std::endl;
 	std::ifstream file(filepath);
 	if (!file.is_open())
 		throw UnableToOpenOBJException();
-	
+
 	std::string line;
 	while (std::getline(file, line)) {
 		this->lineIndex++;
@@ -154,6 +157,9 @@ void ObjectData::load(const char* filepath) {
 		}
 	}
 	file.close();
+	if (this->vertices.empty() || this->faces.empty()) {
+        throw RuntimeException("ERROR: No vertices or faces found in the OBJ file.");
+    }
 	glEnableClientState(GL_VERTEX_ARRAY); // Enable vertex array functionality
 	this->computeCenter();
 	this->computeUVBound();
